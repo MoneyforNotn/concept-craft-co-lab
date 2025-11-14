@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Bookmark, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Bookmark, Loader2, Plus } from "lucide-react";
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
 
@@ -15,6 +15,7 @@ export default function AlignmentDetail() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [todayAlignmentCount, setTodayAlignmentCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,6 +34,19 @@ export default function AlignmentDetail() {
       if (error) throw error;
       setAlignment(data);
       setNotes(data.notes || "");
+
+      // Check today's alignment count
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const today = new Date().toISOString().split('T')[0];
+        const { data: alignments } = await supabase
+          .from('daily_alignments')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('date', today);
+        
+        setTodayAlignmentCount(alignments?.length || 0);
+      }
     } catch (error) {
       console.error('Error loading alignment:', error);
       toast({
@@ -173,6 +187,23 @@ export default function AlignmentDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {todayAlignmentCount < 2 && alignment.date === new Date().toISOString().split('T')[0] && (
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle>Create Second Alignment</CardTitle>
+              <CardDescription>
+                Add another alignment for today
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/create-alignment")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Alignment
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
