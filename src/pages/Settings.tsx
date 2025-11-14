@@ -154,11 +154,11 @@ export default function Settings() {
       <div className="container max-w-2xl mx-auto py-8">
         <Button
           variant="ghost"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/")}
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          Back to Dashboard
         </Button>
 
         <div className="space-y-6">
