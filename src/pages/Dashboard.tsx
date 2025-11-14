@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { User, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -150,6 +151,37 @@ export default function Dashboard() {
     }
   };
 
+  const getTierInfo = (days: number) => {
+    if (days >= 365) {
+      return { tier: 'Platinum', icon: Crown, color: 'from-purple-500 to-pink-500' };
+    } else if (days >= 80) {
+      return { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500' };
+    } else if (days >= 20) {
+      return { tier: 'Silver', icon: Medal, color: 'from-slate-400 to-slate-300' };
+    } else if (days >= 5) {
+      return { tier: 'Bronze', icon: SparklesIcon, color: 'from-orange-600 to-amber-700' };
+    }
+    return { tier: 'Beginner', icon: Trophy, color: 'from-primary to-primary/60' };
+  };
+
+  const getNextMilestone = (current: number) => {
+    const milestones = [5, 10, 20, 40, 80, 160, 365];
+    return milestones.find(m => m > current) || 365;
+  };
+
+  const getPreviousMilestone = (current: number) => {
+    const milestones = [0, 5, 10, 20, 40, 80, 160];
+    return [...milestones].reverse().find(m => m <= current) || 0;
+  };
+
+  const calculateProgress = () => {
+    const next = getNextMilestone(streakCount);
+    const prev = getPreviousMilestone(streakCount);
+    const range = next - prev;
+    const progress = streakCount - prev;
+    return (progress / range) * 100;
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -262,12 +294,30 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-primary">
-                {[5, 10, 20, 40, 80].find(m => m > streakCount) || 80}
+                {getNextMilestone(streakCount)}
               </div>
               <p className="text-xs text-muted-foreground">days</p>
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium">Tier Progress</CardTitle>
+              <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} text-white`}>
+                {getTierInfo(streakCount).tier}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Progress value={calculateProgress()} className="h-2" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{getPreviousMilestone(streakCount)} days</span>
+              <span>{streakCount} / {getNextMilestone(streakCount)} days</span>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-3 gap-4 pb-6">
           <Button
