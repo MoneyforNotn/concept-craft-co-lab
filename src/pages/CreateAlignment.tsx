@@ -51,10 +51,30 @@ export default function CreateAlignment() {
 
       if (error) throw error;
 
-      toast({
-        title: "Alignment created!",
-        description: "Your intention for today has been set.",
-      });
+      // Check for milestone achievement
+      const { data: allAlignments } = await supabase
+        .from('daily_alignments')
+        .select('date')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
+      const uniqueDates = new Set(allAlignments?.map(a => a.date) || []);
+      const totalDays = uniqueDates.size;
+      const milestones = [5, 10, 20, 40, 80];
+      
+      if (milestones.includes(totalDays)) {
+        toast({
+          title: "🎉 Milestone Reached!",
+          description: `Congratulations on ${totalDays} days of mindful alignment! Your dedication and consistency are inspiring. Keep cultivating your presence! 🌟`,
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Alignment created!",
+          description: "Your intention for today has been set.",
+        });
+      }
+
       navigate("/");
     } catch (error: any) {
       const errorMessage = error.message?.includes('Maximum of 2 alignments')
