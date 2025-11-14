@@ -68,17 +68,22 @@ export default function Dashboard() {
   useEffect(() => {
     const checkNotifications = async () => {
       try {
-        const pending = await getAllPendingNotifications();
-        setHasNotifications(pending.length > 0);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: settings } = await supabase
+          .from('notification_settings')
+          .select('frequency_count')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setHasNotifications(settings && settings.frequency_count > 0);
       } catch (error) {
         console.error('Error checking notifications:', error);
       }
     };
 
     checkNotifications();
-    // Check every minute
-    const interval = setInterval(checkNotifications, 60000);
-    return () => clearInterval(interval);
   }, []);
 
   const loadUserData = async (userId: string) => {
