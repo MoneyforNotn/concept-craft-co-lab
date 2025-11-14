@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
-import { ArrowLeft, Loader2, Bell, BellOff } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw } from "lucide-react";
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
+  const [savingMission, setSavingMission] = useState(false);
+  const [personalMission, setPersonalMission] = useState("");
   const [frequencyCount, setFrequencyCount] = useState(3);
   const [isRandom, setIsRandom] = useState(false);
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
@@ -28,6 +31,18 @@ export default function Settings() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Load profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('personal_mission')
+        .eq('id', user.id)
+        .single();
+
+      if (profileData) {
+        setPersonalMission(profileData.personal_mission || "");
+      }
+
+      // Load notification settings
       const { data } = await supabase
         .from('notification_settings')
         .select('*')
@@ -83,6 +98,57 @@ export default function Settings() {
     await cancelAllNotifications();
   };
 
+  const handleSaveMission = async () => {
+    setSavingMission(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ personal_mission: personalMission })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Personal mission updated",
+        description: "Your personal mission has been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating mission",
+        description: error.message,
+      });
+    } finally {
+      setSavingMission(false);
+    }
+  };
+
+  const handleRetakeOnboarding = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Mark onboarding as incomplete to allow retaking
+      const { error } = await supabase
+        .from('profiles')
+        .update({ onboarding_completed: false })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      navigate("/onboarding");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-2xl mx-auto py-8">
@@ -95,7 +161,56 @@ export default function Settings() {
           Back
         </Button>
 
-        <Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+              <CardDescription>
+                Edit your personal mission or retake the questions to generate a new one
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="mission">Personal Mission</Label>
+                <Textarea
+                  id="mission"
+                  value={personalMission}
+                  onChange={(e) => setPersonalMission(e.target.value)}
+                  placeholder="Your personal mission..."
+                  className="min-h-32"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSaveMission} 
+                  disabled={savingMission}
+                  className="flex-1"
+                >
+                  {savingMission ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleRetakeOnboarding}
+                  className="flex-1"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retake Questions
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Notification Settings</CardTitle>
             <CardDescription>
@@ -201,6 +316,7 @@ export default function Settings() {
             </p>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
