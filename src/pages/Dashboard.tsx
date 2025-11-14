@@ -100,6 +100,33 @@ export default function Dashboard() {
     }
   };
 
+  const handleResetAlignment = async () => {
+    if (!todayAlignment) return;
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayDate = yesterday.toISOString().split('T')[0];
+    
+    const { error } = await supabase
+      .from('daily_alignments')
+      .update({ date: yesterdayDate })
+      .eq('id', todayAlignment.id);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reset alignment",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Alignment reset",
+        description: "Previous alignment moved to history",
+      });
+      setTodayAlignment(null);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
@@ -145,13 +172,22 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">Emotion</p>
                 <p className="text-xl font-medium">{todayAlignment.emotion}</p>
               </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => navigate(`/alignment/${todayAlignment.id}`)}
-              >
-                View Details
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => navigate(`/alignment/${todayAlignment.id}`)}
+                >
+                  View Details
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleResetAlignment}
+                >
+                  Reset Alignment
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
