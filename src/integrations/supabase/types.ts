@@ -198,18 +198,21 @@ export type Database = {
           id: string
           onboarding_completed: boolean | null
           personal_mission: string | null
+          tutorial_completed: boolean | null
         }
         Insert: {
           created_at?: string | null
           id: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          tutorial_completed?: boolean | null
         }
         Update: {
           created_at?: string | null
           id?: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          tutorial_completed?: boolean | null
         }
         Relationships: []
       }

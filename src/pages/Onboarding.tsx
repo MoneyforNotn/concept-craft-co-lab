@@ -27,8 +27,36 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [isRetaking, setIsRetaking] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    checkIfRetaking();
+  }, []);
+
+  const checkIfRetaking = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.onboarding_completed) {
+        setIsRetaking(true);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/');
+  };
 
   const currentAnswer = responses[QUESTIONS[currentQuestion]?.key] || "";
 
@@ -198,11 +226,18 @@ export default function Onboarding() {
             <span className="text-sm text-muted-foreground">
               Question {currentQuestion + 1} of {QUESTIONS.length}
             </span>
-            <div className="h-2 w-32 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
-              />
+            <div className="flex items-center gap-4">
+              <div className="h-2 w-32 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
+                />
+              </div>
+              {isRetaking && (
+                <Button variant="ghost" size="sm" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              )}
             </div>
           </div>
           <CardTitle className="text-2xl">{QUESTIONS[currentQuestion].question}</CardTitle>
