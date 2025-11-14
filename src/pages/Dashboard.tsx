@@ -53,10 +53,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
 
-    let currentDate = new Date().toISOString().split('T')[0];
+    let currentDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     
     const checkDateChange = setInterval(() => {
-      const newDate = new Date().toISOString().split('T')[0];
+      const newDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
       if (newDate !== currentDate) {
         currentDate = newDate;
         loadUserData(user.id);
@@ -102,7 +102,7 @@ export default function Dashboard() {
         return;
       }
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
       const { data: alignmentData } = await supabase
         .from('daily_alignments')
         .select('*')
