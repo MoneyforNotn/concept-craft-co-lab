@@ -163,7 +163,11 @@ export default function Dashboard() {
           </h1>
           <div className="flex items-center gap-2">
             {hasNotifications && (
-              <Badge variant="secondary" className="gap-1">
+              <Badge 
+                variant="secondary" 
+                className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                onClick={() => navigate("/settings")}
+              >
                 <Bell className="h-3 w-3" />
                 Active
               </Badge>
