@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trophy, Lock, Star } from "lucide-react";
+import { ArrowLeft, Trophy, Lock, Star, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Achievement {
@@ -92,6 +92,42 @@ export default function Achievements() {
     return messages[days] || `${days} Days of Alignment`;
   };
 
+  const getTierInfo = (days: number) => {
+    if (days === 365) {
+      return {
+        tier: 'Platinum',
+        icon: Crown,
+        color: 'from-purple-500 to-pink-500',
+        badgeColor: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+        borderColor: 'border-purple-500/50'
+      };
+    } else if (days >= 80) {
+      return {
+        tier: 'Gold',
+        icon: Award,
+        color: 'from-yellow-500 to-amber-500',
+        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+        borderColor: 'border-yellow-500/50'
+      };
+    } else if (days >= 20) {
+      return {
+        tier: 'Silver',
+        icon: Medal,
+        color: 'from-slate-400 to-slate-300',
+        badgeColor: 'bg-gradient-to-r from-slate-400 to-slate-300 text-white',
+        borderColor: 'border-slate-400/50'
+      };
+    } else {
+      return {
+        tier: 'Bronze',
+        icon: SparklesIcon,
+        color: 'from-orange-600 to-amber-700',
+        badgeColor: 'bg-gradient-to-r from-orange-600 to-amber-700 text-white',
+        borderColor: 'border-orange-600/50'
+      };
+    }
+  };
+
   const isUnlocked = (milestone: number) => totalDays >= milestone;
   const getAchievement = (milestone: number) => 
     achievements.find(a => a.milestone_days === milestone);
@@ -127,13 +163,15 @@ export default function Achievements() {
           {milestones.map((milestone) => {
             const unlocked = isUnlocked(milestone);
             const achievement = getAchievement(milestone);
+            const tierInfo = getTierInfo(milestone);
+            const TierIcon = tierInfo.icon;
 
             return (
               <Card 
                 key={milestone}
                 className={`transition-all ${
                   unlocked 
-                    ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent' 
+                    ? `${tierInfo.borderColor} bg-gradient-to-br from-primary/5 to-transparent` 
                     : 'opacity-60 border-dashed'
                 }`}
               >
@@ -141,15 +179,21 @@ export default function Achievements() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       {unlocked ? (
-                        <Trophy className="h-8 w-8 text-primary" />
+                        <div className={`p-2 rounded-full bg-gradient-to-br ${tierInfo.color}`}>
+                          <TierIcon className="h-6 w-6 text-white" />
+                        </div>
                       ) : (
                         <Lock className="h-8 w-8 text-muted-foreground" />
                       )}
                       <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {milestone} Days
-                          {unlocked && <Badge variant="secondary">Unlocked</Badge>}
-                        </CardTitle>
+                        <div className="flex items-center gap-2 mb-1">
+                          <CardTitle>{milestone} Days</CardTitle>
+                          {unlocked && (
+                            <Badge className={tierInfo.badgeColor}>
+                              {tierInfo.tier}
+                            </Badge>
+                          )}
+                        </div>
                         <CardDescription>
                           {getMilestoneMessage(milestone)}
                         </CardDescription>
