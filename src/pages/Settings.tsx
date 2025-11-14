@@ -158,7 +158,7 @@ export default function Settings() {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          Back
         </Button>
 
         <div className="space-y-6">
