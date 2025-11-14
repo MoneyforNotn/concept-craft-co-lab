@@ -161,7 +161,7 @@ export default function Dashboard() {
     } else if (days >= 5) {
       return { tier: 'Bronze', icon: SparklesIcon, color: 'from-orange-600 to-amber-700' };
     }
-    return { tier: 'Beginner', icon: Trophy, color: 'from-primary to-primary/60' };
+    return { tier: 'Trainee', icon: Trophy, color: 'from-primary to-primary/60' };
   };
 
   const getNextMilestone = (current: number) => {
