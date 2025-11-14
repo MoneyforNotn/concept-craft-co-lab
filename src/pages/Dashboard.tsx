@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { User, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, LogOut, Bell, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
+import TutorialWalkthrough from "@/components/TutorialWalkthrough";
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [todayAlignments, setTodayAlignments] = useState<any[]>([]);
   const [streakCount, setStreakCount] = useState(0);
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -61,7 +63,7 @@ export default function Dashboard() {
         currentDate = newDate;
         loadUserData(user.id);
       }
-    }, 60000); // Check every minute
+    }, 60000);
 
     return () => clearInterval(checkDateChange);
   }, [user]);
@@ -102,53 +104,62 @@ export default function Dashboard() {
         return;
       }
 
-      const today = new Date().toISOString().split('T')[0];
-      const { data: alignmentData } = await supabase
+      const todayDate = new Date().toISOString().split('T')[0];
+      const { data: alignmentsData } = await supabase
+        .from('daily_alignments')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (alignmentsData && alignmentsData.length === 0 && profileData && !profileData.tutorial_completed) {
+        setShowTutorial(true);
+      }
+
+      const { data: todayData } = await supabase
         .from('daily_alignments')
         .select('*')
         .eq('user_id', userId)
-        .eq('date', today)
-        .order('created_at', { ascending: true });
+        .eq('date', todayDate)
+        .order('created_at', { ascending: false });
 
-      setTodayAlignments(alignmentData || []);
+      setTodayAlignments(todayData || []);
 
-      const { data: alignments } = await supabase
+      const { data: allAlignments } = await supabase
         .from('daily_alignments')
         .select('date')
         .eq('user_id', userId)
         .order('date', { ascending: false });
 
-      if (alignments) {
-        setStreakCount(alignments.length);
+      if (allAlignments && allAlignments.length > 0) {
+        const uniqueDates = [...new Set(allAlignments.map(a => a.date))].sort().reverse();
+        let streak = 0;
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < uniqueDates.length; i++) {
+          const alignmentDate = new Date(uniqueDates[i]);
+          alignmentDate.setHours(0, 0, 0, 0);
+          
+          const daysDiff = Math.floor((currentDate.getTime() - alignmentDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysDiff === i) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        
+        setStreakCount(streak);
+      } else {
+        setStreakCount(0);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error loading user data:', error);
     }
   };
 
-  const handleResetAlignment = async (alignmentId: string) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayDate = yesterday.toISOString().split('T')[0];
-    
-    const { error } = await supabase
-      .from('daily_alignments')
-      .update({ date: yesterdayDate })
-      .eq('id', alignmentId);
-    
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reset alignment",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Alignment reset",
-        description: "Alignment moved to history",
-      });
-      if (user) loadUserData(user.id);
-    }
+  const handleAddAlignment = () => {
+    navigate("/create-alignment");
+    if (user) loadUserData(user.id);
   };
 
   const getTierInfo = (days: number) => {
@@ -191,169 +202,185 @@ export default function Dashboard() {
     return null;
   }
 
+  const tierInfo = getTierInfo(streakCount);
+  const TierIcon = tierInfo.icon;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
-      <div className="container max-w-4xl mx-auto p-4 space-y-6">
-        <div className="flex justify-between items-center pt-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Mindful Presence
-          </h1>
-          <div className="flex items-center gap-2">
-            {hasNotifications && (
-              <Badge 
-                variant="secondary" 
-                className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() => navigate("/settings")}
-              >
-                <Bell className="h-3 w-3" />
-                Active
-              </Badge>
-            )}
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5" />
-            </Button>
+    <>
+      <TutorialWalkthrough 
+        open={showTutorial}
+        onClose={() => setShowTutorial(false)}
+        onComplete={() => {
+          setShowTutorial(false);
+          if (user) loadUserData(user.id);
+        }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
+        <div className="container max-w-4xl mx-auto p-4 space-y-6">
+          <div className="flex justify-between items-center pt-6">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Mindful Presence
+            </h1>
+            <div className="flex items-center gap-2">
+              {hasNotifications && (
+                <Badge 
+                  variant="secondary" 
+                  className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                  onClick={() => navigate("/settings")}
+                >
+                  <Bell className="h-3 w-3" />
+                  Active
+                </Badge>
+              )}
+              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg leading-relaxed italic">{profile.personal_mission}</p>
-          </CardContent>
-        </Card>
-
-        {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
-          <Card key={alignment.id}>
+          <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
             <CardHeader>
-              <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
-              <CardDescription>
-                Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </CardDescription>
+              <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed italic">{profile.personal_mission}</p>
+            </CardContent>
+          </Card>
+
+          {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
+            <Card key={alignment.id}>
+              <CardHeader>
+                <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
+                <CardDescription>
+                  Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Intention</p>
+                  <p className="text-xl font-medium">{alignment.intention}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Emotion</p>
+                  <p className="text-xl font-medium">{alignment.emotion}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => navigate(`/alignment/${alignment.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-accent" />
+                  Current Streak
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-accent">{streakCount}</div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {streakCount === 1 ? 'day' : 'days'} in a row
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Next Milestone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-primary">{getNextMilestone(streakCount)}</div>
+                <p className="text-sm text-muted-foreground mt-1">days</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TierIcon className="h-5 w-5" />
+                Tier Progress
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Intention</p>
-                <p className="text-xl font-medium">{alignment.intention}</p>
+              <div className="flex items-center justify-between">
+                <Badge className={`bg-gradient-to-r ${tierInfo.tier}`}>
+                  {tierInfo.tier}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {streakCount} / {getNextMilestone(streakCount)} days
+                </span>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Emotion</p>
-                <p className="text-xl font-medium">{alignment.emotion}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => navigate(`/alignment/${alignment.id}`)}
-                >
-                  View Details
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => handleResetAlignment(alignment.id)}
-                >
-                  Reset
-                </Button>
-              </div>
+              <Progress value={calculateProgress()} className="h-3" />
             </CardContent>
           </Card>
-        ))}
 
-        {todayAlignments.length === 0 && (
-          <Card className="border-dashed">
-            <CardHeader>
-              <CardTitle>Create Today's Alignment</CardTitle>
-              <CardDescription>
-                Set your intention and emotion for the day
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" onClick={() => navigate("/create-alignment")}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Alignment
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link to="/guide">
+              <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Book className="h-5 w-5" />
+                    Guide
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{streakCount}</div>
-              <p className="text-xs text-muted-foreground">days</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Next Milestone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {getNextMilestone(streakCount)}
-              </div>
-              <p className="text-xs text-muted-foreground">days</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Link to="/history">
+              <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Book className="h-5 w-5" />
+                    History
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Tier Progress</CardTitle>
-              <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} text-white`}>
-                {getTierInfo(streakCount).tier}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Progress value={calculateProgress()} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{getPreviousMilestone(streakCount)} days</span>
-              <span>{streakCount} / {getNextMilestone(streakCount)} days</span>
-            </div>
-          </CardContent>
-        </Card>
+            <Link to="/achievements">
+              <Card className="hover:bg-accent/5 transition-colors cursor-pointer h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Trophy className="h-5 w-5" />
+                    Achievements
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-3 gap-4 pb-6">
           <Button
-            variant="outline"
-            className="h-24 flex flex-col gap-2"
-            onClick={() => navigate("/achievements")}
+            onClick={handleAddAlignment}
+            size="lg"
+            className="w-full"
           >
-            <Trophy className="h-6 w-6" />
-            <span>Achievements</span>
+            <Plus className="mr-2 h-5 w-5" />
+            Create New Alignment
           </Button>
+
           <Button
             variant="outline"
-            className="h-24 flex flex-col gap-2"
-            onClick={() => navigate("/history")}
+            className="w-full mb-6"
+            onClick={() => navigate("/settings")}
           >
-            <Book className="h-6 w-6" />
-            <span>History</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-24 flex flex-col gap-2"
-            onClick={() => navigate("/guide")}
-          >
-            <Sparkles className="h-6 w-6" />
-            <span>Guide</span>
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
           </Button>
         </div>
-
-        <Button
-          variant="outline"
-          className="w-full mb-6"
-          onClick={() => navigate("/settings")}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </Button>
       </div>
     </>
   );
