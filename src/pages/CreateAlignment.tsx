@@ -42,10 +42,14 @@ export default function CreateAlignment() {
       });
       navigate("/");
     } catch (error: any) {
+      const errorMessage = error.message?.includes('Maximum of 2 alignments')
+        ? "You've already created 2 alignments today. Reset one to create a new alignment."
+        : error.message;
+      
       toast({
         variant: "destructive",
         title: "Error creating alignment",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -66,9 +70,9 @@ export default function CreateAlignment() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Create Today's Alignment</CardTitle>
+            <CardTitle className="text-2xl">Create Alignment</CardTitle>
             <CardDescription>
-              Set your intention and emotion to guide your day
+              Set your intention and emotion to guide your day (up to 2 per day)
             </CardDescription>
           </CardHeader>
           <CardContent>
