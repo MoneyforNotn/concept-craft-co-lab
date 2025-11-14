@@ -126,27 +126,10 @@ export default function Settings() {
     }
   };
 
-  const handleRetakeOnboarding = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Mark onboarding as incomplete to allow retaking
-      const { error } = await supabase
-        .from('profiles')
-        .update({ onboarding_completed: false })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      navigate("/onboarding");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    }
+  const handleRetakeOnboarding = () => {
+    // Navigate to onboarding without marking as incomplete
+    // User can cancel from onboarding and return to dashboard
+    navigate('/onboarding');
   };
 
   return (
