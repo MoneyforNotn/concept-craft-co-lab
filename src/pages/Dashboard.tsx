@@ -1,0 +1,202 @@
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Session } from "@supabase/supabase-js";
+import { Sparkles, Book, Settings, Plus, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+export default function Dashboard() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [todayAlignment, setTodayAlignment] = useState<any>(null);
+  const [streakCount, setStreakCount] = useState(0);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setTimeout(() => {
+            loadUserData(session.user.id);
+          }, 0);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        loadUserData(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (userId: string) => {
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      setProfile(profileData);
+
+      if (profileData && !profileData.onboarding_completed) {
+        navigate("/onboarding");
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const { data: alignmentData } = await supabase
+        .from('daily_alignments')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', today)
+        .maybeSingle();
+
+      setTodayAlignment(alignmentData);
+
+      const { data: alignments } = await supabase
+        .from('daily_alignments')
+        .select('date')
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
+
+      if (alignments) {
+        setStreakCount(alignments.length);
+      }
+    } catch (error: any) {
+      console.error('Error loading user data:', error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
+
+  if (!user || !profile) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
+      <div className="container max-w-4xl mx-auto p-4 space-y-6">
+        <div className="flex justify-between items-center pt-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Mindful Presence
+          </h1>
+          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-lg leading-relaxed italic">{profile.personal_mission}</p>
+          </CardContent>
+        </Card>
+
+        {todayAlignment ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Today's Alignment</CardTitle>
+              <CardDescription>You've set your intention for today</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Intention</p>
+                <p className="text-xl font-medium">{todayAlignment.intention}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Emotion</p>
+                <p className="text-xl font-medium">{todayAlignment.emotion}</p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate(`/alignment/${todayAlignment.id}`)}
+              >
+                View Details
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle>Create Today's Alignment</CardTitle>
+              <CardDescription>
+                Set your intention and emotion for the day
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/create-alignment")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Alignment
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{streakCount}</div>
+              <p className="text-xs text-muted-foreground">days</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Next Milestone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">
+                {[5, 10, 20, 40, 80].find(m => m > streakCount) || 80}
+              </div>
+              <p className="text-xs text-muted-foreground">days</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pb-6">
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
+            onClick={() => navigate("/history")}
+          >
+            <Book className="h-6 w-6" />
+            <span>History</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
+            onClick={() => navigate("/settings")}
+          >
+            <Settings className="h-6 w-6" />
+            <span>Settings</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
