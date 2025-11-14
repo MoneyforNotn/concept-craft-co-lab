@@ -161,9 +161,17 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Mindful Presence
           </h1>
-          <Button variant="ghost" size="icon" onClick={handleSignOut}>
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {hasNotifications && (
+              <Badge variant="secondary" className="gap-1">
+                <Bell className="h-3 w-3" />
+                Active
+              </Badge>
+            )}
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
@@ -178,20 +186,10 @@ export default function Dashboard() {
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
           <Card key={alignment.id}>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
-                  <CardDescription>
-                    Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </CardDescription>
-                </div>
-                {hasNotifications && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Bell className="h-3 w-3" />
-                    Active
-                  </Badge>
-                )}
-              </div>
+              <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
+              <CardDescription>
+                Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
