@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
+import { ArrowLeft, Loader2, Bell, BellOff } from "lucide-react";
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ export default function Settings() {
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { scheduleNotifications, cancelAllNotifications } = useNotifications();
 
   useEffect(() => {
     loadSettings();
@@ -59,6 +61,9 @@ export default function Settings() {
 
       if (error) throw error;
 
+      // Schedule the notifications
+      await scheduleNotifications(frequencyCount, isRandom, scheduledTimes);
+
       toast({
         title: "Settings saved",
         description: "Your notification preferences have been updated.",
@@ -72,6 +77,10 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancelNotifications = async () => {
+    await cancelAllNotifications();
   };
 
   return (
@@ -158,8 +167,20 @@ export default function Settings() {
                   Saving...
                 </>
               ) : (
-                "Save Settings"
+                <>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Save & Schedule Notifications
+                </>
               )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleCancelNotifications}
+              className="w-full gap-2"
+            >
+              <BellOff className="h-4 w-4" />
+              Cancel All Notifications
             </Button>
           </CardContent>
         </Card>
@@ -170,13 +191,13 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              Notifications will gently remind you to embody your daily intention and emotion.
+              Notifications will gently remind you to embody your daily intention and emotion throughout the day.
             </p>
             <p>
-              To enable push notifications, you'll need to grant permission when prompted by your device.
+              When you save your settings, the app will request permission to send notifications and schedule them based on your preferences.
             </p>
             <p className="text-xs mt-4 italic">
-              Note: Notification functionality requires the native app to be installed on your device.
+              Note: Full notification functionality requires the native app to be installed on your device.
             </p>
           </CardContent>
         </Card>
