@@ -45,6 +45,22 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    let currentDate = new Date().toISOString().split('T')[0];
+    
+    const checkDateChange = setInterval(() => {
+      const newDate = new Date().toISOString().split('T')[0];
+      if (newDate !== currentDate) {
+        currentDate = newDate;
+        loadUserData(user.id);
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(checkDateChange);
+  }, [user]);
+
   const loadUserData = async (userId: string) => {
     try {
       const { data: profileData } = await supabase
