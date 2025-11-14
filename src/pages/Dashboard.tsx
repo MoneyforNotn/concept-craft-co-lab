@@ -11,7 +11,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [todayAlignment, setTodayAlignment] = useState<any>(null);
+  const [todayAlignments, setTodayAlignments] = useState<any[]>([]);
   const [streakCount, setStreakCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -82,9 +82,9 @@ export default function Dashboard() {
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      setTodayAlignment(alignmentData);
+      setTodayAlignments(alignmentData || []);
 
       const { data: alignments } = await supabase
         .from('daily_alignments')
@@ -100,9 +100,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleResetAlignment = async () => {
-    if (!todayAlignment) return;
-    
+  const handleResetAlignment = async (alignmentId: string) => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayDate = yesterday.toISOString().split('T')[0];
@@ -110,7 +108,7 @@ export default function Dashboard() {
     const { error } = await supabase
       .from('daily_alignments')
       .update({ date: yesterdayDate })
-      .eq('id', todayAlignment.id);
+      .eq('id', alignmentId);
     
     if (error) {
       toast({
@@ -121,9 +119,9 @@ export default function Dashboard() {
     } else {
       toast({
         title: "Alignment reset",
-        description: "Previous alignment moved to history",
+        description: "Alignment moved to history",
       });
-      setTodayAlignment(null);
+      if (user) loadUserData(user.id);
     }
   };
 
@@ -157,45 +155,53 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {todayAlignment ? (
-          <Card>
+        {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
+          <Card key={alignment.id}>
             <CardHeader>
-              <CardTitle>Today's Alignment</CardTitle>
-              <CardDescription>You've set your intention for today</CardDescription>
+              <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
+              <CardDescription>
+                Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Intention</p>
-                <p className="text-xl font-medium">{todayAlignment.intention}</p>
+                <p className="text-xl font-medium">{alignment.intention}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Emotion</p>
-                <p className="text-xl font-medium">{todayAlignment.emotion}</p>
+                <p className="text-xl font-medium">{alignment.emotion}</p>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={() => navigate(`/alignment/${todayAlignment.id}`)}
+                  onClick={() => navigate(`/alignment/${alignment.id}`)}
                 >
                   View Details
                 </Button>
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={handleResetAlignment}
+                  onClick={() => handleResetAlignment(alignment.id)}
                 >
-                  Reset Alignment
+                  Reset
                 </Button>
               </div>
             </CardContent>
           </Card>
-        ) : (
+        ))}
+
+        {todayAlignments.length < 2 && (
           <Card className="border-dashed">
             <CardHeader>
-              <CardTitle>Create Today's Alignment</CardTitle>
+              <CardTitle>
+                {todayAlignments.length === 0 ? "Create Today's Alignment" : "Create Second Alignment"}
+              </CardTitle>
               <CardDescription>
-                Set your intention and emotion for the day
+                {todayAlignments.length === 0 
+                  ? "Set your intention and emotion for the day"
+                  : "Add another alignment for today"}
               </CardDescription>
             </CardHeader>
             <CardContent>
