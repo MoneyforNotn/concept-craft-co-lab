@@ -82,7 +82,7 @@ export default function Dashboard() {
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
       setTodayAlignments(alignmentData || []);
 
