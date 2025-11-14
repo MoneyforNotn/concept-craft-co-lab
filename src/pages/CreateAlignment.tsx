@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function CreateAlignment() {
@@ -14,6 +15,7 @@ export default function CreateAlignment() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { cancelAllNotifications } = useNotifications();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,19 @@ export default function CreateAlignment() {
       if (!user) throw new Error("Not authenticated");
 
       const today = new Date().toISOString().split('T')[0];
+
+      // Check if there's already an alignment today
+      const { data: existingAlignments } = await supabase
+        .from('daily_alignments')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('date', today);
+
+      // If creating the first alignment today, cancel all previous notifications
+      if (!existingAlignments || existingAlignments.length === 0) {
+        await cancelAllNotifications();
+        console.log('Cancelled previous alignment notifications');
+      }
 
       const { error } = await supabase
         .from('daily_alignments')
