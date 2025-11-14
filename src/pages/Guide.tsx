@@ -1,23 +1,37 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Target, Bell, BookOpen, Sparkles, Award, History, Bookmark, Settings, TrendingUp } from "lucide-react";
+import { ArrowLeft, Heart, Target, Bell, BookOpen, Sparkles, Award, History, Bookmark, Settings, TrendingUp, PlayCircle } from "lucide-react";
+import TutorialWalkthrough from "@/components/TutorialWalkthrough";
 
 export default function Guide() {
   const navigate = useNavigate();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4 pb-20">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 pt-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Welcome Guide</h1>
-            <p className="text-muted-foreground">Learn how to practice mindful alignment</p>
+    <>
+      <TutorialWalkthrough 
+        open={showTutorial}
+        onClose={() => setShowTutorial(false)}
+        onComplete={() => setShowTutorial(false)}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4 pb-20">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center gap-4 pt-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold">Welcome Guide</h1>
+              <p className="text-muted-foreground">Learn how to practice mindful alignment</p>
+            </div>
+            <Button onClick={() => setShowTutorial(true)} className="gap-2">
+              <PlayCircle className="h-4 w-4" />
+              Start Tutorial
+            </Button>
           </div>
-        </div>
 
         <Card className="border-primary/20">
           <CardHeader>
@@ -342,6 +356,6 @@ export default function Guide() {
           </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
