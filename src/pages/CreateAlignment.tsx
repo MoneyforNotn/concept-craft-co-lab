@@ -60,13 +60,31 @@ export default function CreateAlignment() {
 
       const uniqueDates = new Set(allAlignments?.map(a => a.date) || []);
       const totalDays = uniqueDates.size;
-      const milestones = [5, 10, 20, 40, 80];
+      const milestones = [5, 10, 20, 40, 80, 160, 365];
       
       if (milestones.includes(totalDays)) {
+        // Check if this milestone already has an achievement
+        const { data: existingAchievement } = await supabase
+          .from('milestone_achievements')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('milestone_days', totalDays)
+          .maybeSingle();
+
+        if (!existingAchievement) {
+          // Create the achievement without alignment initially
+          await supabase
+            .from('milestone_achievements')
+            .insert({
+              user_id: user.id,
+              milestone_days: totalDays,
+            });
+        }
+
         toast({
           title: "🎉 Milestone Reached!",
-          description: `Congratulations on ${totalDays} days of mindful alignment! Your dedication and consistency are inspiring. Keep cultivating your presence! 🌟`,
-          duration: 6000,
+          description: `Congratulations on ${totalDays} days of mindful alignment! Your dedication and consistency are inspiring. Visit Achievements to select a featured alignment! 🌟`,
+          duration: 8000,
         });
       } else {
         toast({

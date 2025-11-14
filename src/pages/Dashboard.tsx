@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -273,6 +273,14 @@ export default function Dashboard() {
           <Button
             variant="outline"
             className="h-24 flex flex-col gap-2"
+            onClick={() => navigate("/achievements")}
+          >
+            <Trophy className="h-6 w-6" />
+            <span>Achievements</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
             onClick={() => navigate("/history")}
           >
             <Book className="h-6 w-6" />
@@ -286,15 +294,16 @@ export default function Dashboard() {
             <Sparkles className="h-6 w-6" />
             <span>Guide</span>
           </Button>
-          <Button
-            variant="outline"
-            className="h-24 flex flex-col gap-2"
-            onClick={() => navigate("/settings")}
-          >
-            <Settings className="h-6 w-6" />
-            <span>Settings</span>
-          </Button>
         </div>
+
+        <Button
+          variant="outline"
+          className="w-full mb-6"
+          onClick={() => navigate("/settings")}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Settings
+        </Button>
       </div>
     </div>
   );

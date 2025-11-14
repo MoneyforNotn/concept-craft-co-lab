@@ -87,6 +87,41 @@ export type Database = {
           },
         ]
       }
+      milestone_achievements: {
+        Row: {
+          achieved_at: string
+          alignment_id: string | null
+          created_at: string
+          id: string
+          milestone_days: number
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string
+          alignment_id?: string | null
+          created_at?: string
+          id?: string
+          milestone_days: number
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string
+          alignment_id?: string | null
+          created_at?: string
+          id?: string
+          milestone_days?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_alignment"
+            columns: ["alignment_id"]
+            isOneToOne: false
+            referencedRelation: "daily_alignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string | null
