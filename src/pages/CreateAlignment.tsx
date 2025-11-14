@@ -79,12 +79,12 @@ export default function CreateAlignment() {
                   id="intention"
                   value={intention}
                   onChange={(e) => setIntention(e.target.value)}
-                  placeholder="e.g., Lead by example"
+                  placeholder=""
                   required
                   disabled={loading}
                 />
                 <p className="text-sm text-muted-foreground">
-                  What do you want to focus on today?
+                  What do I want to manifest with my action & interactions today?
                 </p>
               </div>
 
@@ -94,12 +94,12 @@ export default function CreateAlignment() {
                   id="emotion"
                   value={emotion}
                   onChange={(e) => setEmotion(e.target.value)}
-                  placeholder="e.g., Attentive"
+                  placeholder=""
                   required
                   disabled={loading}
                 />
                 <p className="text-sm text-muted-foreground">
-                  How do you want to embody this intention?
+                  With what energy do I want to embody this intention?
                 </p>
               </div>
 
