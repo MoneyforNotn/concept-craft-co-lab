@@ -11,6 +11,7 @@ import CreateAlignment from "./pages/CreateAlignment";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import AlignmentDetail from "./pages/AlignmentDetail";
+import Guide from "./pages/Guide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/alignment/:id" element={<AlignmentDetail />} />
+          <Route path="/guide" element={<Guide />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -178,7 +178,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pb-6">
+        <div className="grid grid-cols-3 gap-4 pb-6">
           <Button
             variant="outline"
             className="h-24 flex flex-col gap-2"
@@ -186,6 +186,14 @@ export default function Dashboard() {
           >
             <Book className="h-6 w-6" />
             <span>History</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
+            onClick={() => navigate("/guide")}
+          >
+            <Sparkles className="h-6 w-6" />
+            <span>Guide</span>
           </Button>
           <Button
             variant="outline"
