@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, ArrowLeft } from "lucide-react";
 
 const QUESTIONS = [
   { key: "cant_live_without", question: "What is something I can't live without?" },
@@ -27,8 +27,28 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [isRetaking, setIsRetaking] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkIfRetaking = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      if (profile && profile.onboarding_completed === false) {
+        setIsRetaking(true);
+      }
+    };
+
+    checkIfRetaking();
+  }, []);
 
   const currentAnswer = responses[QUESTIONS[currentQuestion]?.key] || "";
 
@@ -194,6 +214,16 @@ export default function Onboarding() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
+          {isRetaking && (
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/settings")}
+              className="mb-4 w-fit"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Settings
+            </Button>
+          )}
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-muted-foreground">
               Question {currentQuestion + 1} of {QUESTIONS.length}
