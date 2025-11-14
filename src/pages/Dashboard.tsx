@@ -3,9 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { User, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, LogOut } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -13,8 +15,10 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [todayAlignments, setTodayAlignments] = useState<any[]>([]);
   const [streakCount, setStreakCount] = useState(0);
+  const [hasNotifications, setHasNotifications] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getAllPendingNotifications } = useNotifications();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -60,6 +64,22 @@ export default function Dashboard() {
 
     return () => clearInterval(checkDateChange);
   }, [user]);
+
+  useEffect(() => {
+    const checkNotifications = async () => {
+      try {
+        const pending = await getAllPendingNotifications();
+        setHasNotifications(pending.length > 0);
+      } catch (error) {
+        console.error('Error checking notifications:', error);
+      }
+    };
+
+    checkNotifications();
+    // Check every minute
+    const interval = setInterval(checkNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadUserData = async (userId: string) => {
     try {
@@ -158,10 +178,20 @@ export default function Dashboard() {
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
           <Card key={alignment.id}>
             <CardHeader>
-              <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
-              <CardDescription>
-                Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Today's Alignment {todayAlignments.length > 1 ? `#${index + 1}` : ''}</CardTitle>
+                  <CardDescription>
+                    Created at {new Date(alignment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </CardDescription>
+                </div>
+                {hasNotifications && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Bell className="h-3 w-3" />
+                    Active
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
