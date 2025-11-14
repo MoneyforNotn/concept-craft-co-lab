@@ -192,16 +192,12 @@ export default function Dashboard() {
           </Card>
         ))}
 
-        {todayAlignments.length < 2 && (
+        {todayAlignments.length === 0 && (
           <Card className="border-dashed">
             <CardHeader>
-              <CardTitle>
-                {todayAlignments.length === 0 ? "Create Today's Alignment" : "Create Second Alignment"}
-              </CardTitle>
+              <CardTitle>Create Today's Alignment</CardTitle>
               <CardDescription>
-                {todayAlignments.length === 0 
-                  ? "Set your intention and emotion for the day"
-                  : "Add another alignment for today"}
+                Set your intention and emotion for the day
               </CardDescription>
             </CardHeader>
             <CardContent>
