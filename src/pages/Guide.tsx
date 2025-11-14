@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Target, Bell, BookOpen, Sparkles } from "lucide-react";
+import { ArrowLeft, Heart, Target, Bell, BookOpen, Sparkles, Award, History, Bookmark, Settings, TrendingUp } from "lucide-react";
 
 export default function Guide() {
   const navigate = useNavigate();
@@ -117,54 +117,173 @@ export default function Guide() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                  1
-                </div>
-                <div>
-                  <p className="font-medium">Start Your Day</p>
-                  <p className="text-sm text-muted-foreground">
-                    Each morning, create your daily alignment by choosing an intention and emotion.
-                  </p>
-                </div>
-              </div>
+            <ol className="space-y-3 text-sm text-foreground/90">
+              <li className="flex gap-3">
+                <span className="font-semibold text-primary min-w-[1.5rem]">1.</span>
+                <span>
+                  Start each day by creating a new alignment. Set an intention that resonates 
+                  with your personal mission.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-semibold text-primary min-w-[1.5rem]">2.</span>
+                <span>
+                  Choose an emotion that will support this intention. How do you want to feel 
+                  as you embody your intention?
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-semibold text-primary min-w-[1.5rem]">3.</span>
+                <span>
+                  Throughout the day, pause and reconnect with your alignment. Ask yourself: 
+                  "Am I living this intention? Am I feeling this emotion?"
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-semibold text-primary min-w-[1.5rem]">4.</span>
+                <span>
+                  In the evening, reflect on your day. Add notes to capture insights, 
+                  challenges, or moments of alignment.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="font-semibold text-primary min-w-[1.5rem]">5.</span>
+                <span>
+                  Review your history periodically to notice patterns and celebrate your growth. 
+                  Your past alignments tell the story of your journey.
+                </span>
+              </li>
+            </ol>
+          </CardContent>
+        </Card>
 
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                  2
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card className="border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <TrendingUp className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Receive Reminders</p>
-                  <p className="text-sm text-muted-foreground">
-                    Get gentle notifications throughout the day to help you remember and embody your alignment.
-                  </p>
+                  <CardTitle className="text-xl">Streaks & Progress</CardTitle>
+                  <CardDescription>Track your consistency</CardDescription>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-foreground/90">
+                Build momentum by maintaining daily streaks. Your tier progress shows how far 
+                you've come from Trainee to Diamond level.
+              </p>
+              <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                <li>• Current streak counter</li>
+                <li>• Tier progress bar</li>
+                <li>• Next milestone targets</li>
+              </ul>
+            </CardContent>
+          </Card>
 
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                  3
+          <Card className="border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-secondary/10">
+                  <Award className="h-5 w-5 text-secondary" />
                 </div>
                 <div>
-                  <p className="font-medium">Reflect & Journal</p>
-                  <p className="text-sm text-muted-foreground">
-                    Add notes, thoughts, or photos to your alignment entries. Revisit past days to see your growth.
-                  </p>
+                  <CardTitle className="text-xl">Achievements</CardTitle>
+                  <CardDescription>Celebrate milestones</CardDescription>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-foreground/90">
+                Unlock achievements at key milestones (7, 30, 90, 180, 365 days). Each 
+                achievement marks significant progress in your journey.
+              </p>
+              <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                <li>• Bronze, Silver, Gold, Diamond tiers</li>
+                <li>• Special alignment selection</li>
+                <li>• Track all earned badges</li>
+              </ul>
+            </CardContent>
+          </Card>
 
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                  4
+          <Card className="border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-accent/10">
+                  <History className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <p className="font-medium">Build Your Streak</p>
-                  <p className="text-sm text-muted-foreground">
-                    Track your consistency and celebrate milestones at 5, 10, 20, 40, and 80 days.
-                  </p>
+                  <CardTitle className="text-xl">History</CardTitle>
+                  <CardDescription>Review your journey</CardDescription>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-foreground/90">
+                Access all your past alignments in one place. Search, filter, and reflect on 
+                your personal growth over time.
+              </p>
+              <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                <li>• Calendar view</li>
+                <li>• Search and filters</li>
+                <li>• View detailed entries</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Bookmark className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Bookmarks</CardTitle>
+                  <CardDescription>Save meaningful moments</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-foreground/90">
+                Bookmark alignments that resonate deeply. Return to them for inspiration or 
+                when you need guidance.
+              </p>
+              <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                <li>• Quick access to favorites</li>
+                <li>• Filter by bookmarked</li>
+                <li>• Revisit powerful insights</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="border-primary/20">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-secondary/10">
+                <Settings className="h-5 w-5 text-secondary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Settings & Customization</CardTitle>
+                <CardDescription>Personalize your experience</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-foreground/90">
+              Tailor the app to your needs with notification preferences, theme options, 
+              and personal mission management.
+            </p>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Key settings:</p>
+              <ul className="text-sm space-y-1 text-muted-foreground ml-4">
+                <li>• Edit or regenerate your personal mission</li>
+                <li>• Configure reminder notifications</li>
+                <li>• Adjust notification frequency and timing</li>
+                <li>• Toggle random reminder times</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
