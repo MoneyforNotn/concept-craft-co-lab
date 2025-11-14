@@ -25,7 +25,7 @@ export default function CreateAlignment() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
       // Check if there's already an alignment today
       const { data: existingAlignments } = await supabase
