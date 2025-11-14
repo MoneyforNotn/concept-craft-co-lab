@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,18 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+        if (error) throw error;
+        toast({
+          title: "Reset link sent!",
+          description: "Check your email for the password reset link.",
+        });
+        setIsForgotPassword(false);
+        setIsLogin(true);
+      } else if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -62,7 +74,7 @@ export default function Auth() {
             Mindful Presence
           </CardTitle>
           <CardDescription>
-            {isLogin ? "Welcome back" : "Begin your journey"}
+            {isForgotPassword ? "Reset your password" : isLogin ? "Welcome back" : "Begin your journey"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -78,37 +90,55 @@ export default function Auth() {
                 disabled={loading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
+            {!isForgotPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Please wait
                 </>
+              ) : isForgotPassword ? (
+                "Send Reset Link"
               ) : isLogin ? (
                 "Sign In"
               ) : (
                 "Create Account"
               )}
             </Button>
+            {isLogin && !isForgotPassword && (
+              <Button
+                type="button"
+                variant="link"
+                className="w-full text-sm"
+                onClick={() => setIsForgotPassword(true)}
+                disabled={loading}
+              >
+                Forgot password?
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
               className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsForgotPassword(false);
+                setIsLogin(!isLogin);
+              }}
               disabled={loading}
             >
-              {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
+              {isForgotPassword ? "Back to sign in" : isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
             </Button>
           </form>
         </CardContent>
