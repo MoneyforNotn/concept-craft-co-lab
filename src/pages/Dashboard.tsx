@@ -355,6 +355,6 @@ export default function Dashboard() {
           Settings
         </Button>
       </div>
-    </div>
+    </>
   );
 }
