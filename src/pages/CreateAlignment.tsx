@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { getCurrentDate } from "@/lib/timezoneUtils";
 
 export default function CreateAlignment() {
   const [intention, setIntention] = useState("");
@@ -25,7 +26,15 @@ export default function CreateAlignment() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      // Get user's timezone preference
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('timezone')
+        .eq('id', user.id)
+        .single();
+
+      const userTimezone = profileData?.timezone || 'local';
+      const today = getCurrentDate(userTimezone);
 
       // Check if there's already an alignment today
       const { data: existingAlignments } = await supabase

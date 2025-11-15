@@ -198,6 +198,7 @@ export type Database = {
           id: string
           onboarding_completed: boolean | null
           personal_mission: string | null
+          timezone: string | null
           tutorial_completed: boolean | null
         }
         Insert: {
@@ -205,6 +206,7 @@ export type Database = {
           id: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          timezone?: string | null
           tutorial_completed?: boolean | null
         }
         Update: {
@@ -212,6 +214,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          timezone?: string | null
           tutorial_completed?: boolean | null
         }
         Relationships: []
