@@ -9,6 +9,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
+import { getCurrentDate } from "@/lib/timezoneUtils";
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -53,17 +54,33 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
 
-    let currentDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
-    
-    const checkDateChange = setInterval(() => {
-      const newDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
-      if (newDate !== currentDate) {
-        currentDate = newDate;
-        loadUserData(user.id);
-      }
-    }, 60000); // Check every minute
+    const checkDateChange = async () => {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('timezone')
+        .eq('id', user.id)
+        .single();
 
-    return () => clearInterval(checkDateChange);
+      const userTimezone = profileData?.timezone || 'local';
+      let currentDate = getCurrentDate(userTimezone);
+      
+      const interval = setInterval(() => {
+        const newDate = getCurrentDate(userTimezone);
+        if (newDate !== currentDate) {
+          currentDate = newDate;
+          loadUserData(user.id);
+        }
+      }, 60000); // Check every minute
+
+      return interval;
+    };
+
+    const setupInterval = async () => {
+      const interval = await checkDateChange();
+      return () => clearInterval(interval);
+    };
+
+    setupInterval();
   }, [user]);
 
   useEffect(() => {
@@ -102,7 +119,8 @@ export default function Dashboard() {
         return;
       }
 
-      const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const userTimezone = profileData?.timezone || 'local';
+      const today = getCurrentDate(userTimezone);
       const { data: alignmentData } = await supabase
         .from('daily_alignments')
         .select('*')

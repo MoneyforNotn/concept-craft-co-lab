@@ -7,14 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
-import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock } from "lucide-react";
+import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [savingMission, setSavingMission] = useState(false);
+  const [savingTimezone, setSavingTimezone] = useState(false);
   const [personalMission, setPersonalMission] = useState("");
+  const [timezone, setTimezone] = useState("local");
+  const [currentDateTime, setCurrentDateTime] = useState("");
   const [frequencyCount, setFrequencyCount] = useState(3);
   const [isRandom, setIsRandom] = useState(false);
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
@@ -26,6 +31,18 @@ export default function Settings() {
     loadSettings();
   }, []);
 
+  useEffect(() => {
+    // Update current date/time display every second
+    const updateDateTime = () => {
+      setCurrentDateTime(getCurrentDateTime(timezone));
+    };
+    
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+    
+    return () => clearInterval(interval);
+  }, [timezone]);
+
   const loadSettings = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -34,12 +51,13 @@ export default function Settings() {
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('personal_mission')
+        .select('personal_mission, timezone')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
         setPersonalMission(profileData.personal_mission || "");
+        setTimezone(profileData.timezone || "local");
       }
 
       // Load notification settings
@@ -139,13 +157,46 @@ export default function Settings() {
 
       if (error) throw error;
 
+      toast({
+        title: "Onboarding reset",
+        description: "Taking you back to the onboarding process.",
+      });
+
       navigate("/onboarding");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error resetting onboarding",
         description: error.message,
       });
+    }
+  };
+
+  const handleSaveTimezone = async () => {
+    setSavingTimezone(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ timezone })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Timezone updated",
+        description: "Your timezone preference has been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating timezone",
+        description: error.message,
+      });
+    } finally {
+      setSavingTimezone(false);
     }
   };
 
@@ -207,6 +258,61 @@ export default function Settings() {
                   Retake Questions
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Date & Time Settings</CardTitle>
+              <CardDescription>
+                Configure your timezone for daily alignment entries
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Current date & time for alignments:</span>
+                </div>
+                <div className="text-lg font-semibold">{currentDateTime}</div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select value={timezone} onValueChange={setTimezone}>
+                  <SelectTrigger id="timezone">
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {commonTimezones.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  This timezone will be used when creating and displaying alignment entries
+                </p>
+              </div>
+
+              <Button 
+                onClick={handleSaveTimezone} 
+                disabled={savingTimezone}
+                className="w-full"
+              >
+                {savingTimezone ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Clock className="mr-2 h-4 w-4" />
+                    Save Timezone
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
 
