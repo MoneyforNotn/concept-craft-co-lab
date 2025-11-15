@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import CreateAlignment from "./pages/CreateAlignment";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import AlignmentDetail from "./pages/AlignmentDetail";
 import Guide from "./pages/Guide";
 import Achievements from "./pages/Achievements";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/create-alignment" element={<CreateAlignment />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/alignment/:id" element={<AlignmentDetail />} />
           <Route path="/guide" element={<Guide />} />
           <Route path="/achievements" element={<Achievements />} />

@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { User, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, LogOut, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
+import { User as UserType, Session } from "@supabase/supabase-js";
+import { Sparkles, Book, Settings, Plus, User, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getCurrentDate } from "@/lib/timezoneUtils";
 
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [todayAlignments, setTodayAlignments] = useState<any[]>([]);
@@ -200,10 +200,6 @@ export default function Dashboard() {
     return (progress / range) * 100;
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
 
   if (!user || !profile) {
     return null;
@@ -227,8 +223,8 @@ export default function Dashboard() {
                 Active
               </Badge>
             )}
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/profile")}>
+              <User className="h-5 w-5" />
             </Button>
           </div>
         </div>
