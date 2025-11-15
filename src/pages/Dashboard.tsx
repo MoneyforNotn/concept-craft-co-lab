@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { User as UserType, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, User, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getCurrentDate } from "@/lib/timezoneUtils";
@@ -224,7 +224,7 @@ export default function Dashboard() {
               </Badge>
             )}
             <Button variant="ghost" size="icon" onClick={() => navigate("/profile")}>
-              <User className="h-5 w-5" />
+              <UserIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
