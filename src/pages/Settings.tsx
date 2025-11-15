@@ -10,8 +10,9 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
-import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun, Monitor } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     loadSettings();
@@ -365,6 +367,49 @@ export default function Settings() {
             <p className="text-xs mt-4 italic">
               Note: Full notification functionality requires the native app to be installed on your device.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Appearance</CardTitle>
+            <CardDescription>
+              Customize the theme and appearance of the app
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Theme</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={theme === "light" ? "default" : "outline"}
+                  onClick={() => setTheme("light")}
+                  className="w-full"
+                >
+                  <Sun className="mr-2 h-4 w-4" />
+                  Light
+                </Button>
+                <Button
+                  variant={theme === "dark" ? "default" : "outline"}
+                  onClick={() => setTheme("dark")}
+                  className="w-full"
+                >
+                  <Moon className="mr-2 h-4 w-4" />
+                  Dark
+                </Button>
+                <Button
+                  variant={theme === "system" ? "default" : "outline"}
+                  onClick={() => setTheme("system")}
+                  className="w-full"
+                >
+                  <Monitor className="mr-2 h-4 w-4" />
+                  System
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Choose between light, dark, or system theme that follows your device settings
+              </p>
+            </div>
           </CardContent>
         </Card>
 
