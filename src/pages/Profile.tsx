@@ -3,17 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { User, Session } from "@supabase/supabase-js";
-import { ArrowLeft, LogOut, Mail, Calendar } from "lucide-react";
+import { ArrowLeft, LogOut, Mail, Calendar, Trophy, Lock, Award, Medal, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
+interface Achievement {
+  id: string;
+  milestone_days: number;
+  achieved_at: string;
+}
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [totalDays, setTotalDays] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const milestones = [5, 10, 20, 40, 80, 160, 365];
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -53,6 +64,26 @@ export default function Profile() {
         .single();
 
       setProfile(profileData);
+
+      // Load achievements
+      const { data: achievementsData } = await supabase
+        .from('milestone_achievements')
+        .select('id, milestone_days, achieved_at')
+        .eq('user_id', userId)
+        .order('milestone_days', { ascending: true });
+
+      if (achievementsData) {
+        setAchievements(achievementsData);
+      }
+
+      // Get total unique days
+      const { data: allAlignments } = await supabase
+        .from('daily_alignments')
+        .select('date')
+        .eq('user_id', userId);
+
+      const uniqueDates = new Set(allAlignments?.map(a => a.date) || []);
+      setTotalDays(uniqueDates.size);
     } catch (error) {
       console.error('Error loading profile:', error);
     }
@@ -80,6 +111,55 @@ export default function Profile() {
       return user.email.substring(0, 2).toUpperCase();
     }
     return "U";
+  };
+
+  const getTierInfo = (days: number) => {
+    if (days === 365) {
+      return {
+        tier: 'Platinum',
+        icon: Crown,
+        color: 'from-purple-500 to-pink-500',
+        badgeColor: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+      };
+    } else if (days >= 80) {
+      return {
+        tier: 'Gold',
+        icon: Award,
+        color: 'from-yellow-500 to-amber-500',
+        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+      };
+    } else if (days >= 20) {
+      return {
+        tier: 'Silver',
+        icon: Medal,
+        color: 'from-slate-400 to-slate-300',
+        badgeColor: 'bg-gradient-to-r from-slate-400 to-slate-300 text-white',
+      };
+    } else {
+      return {
+        tier: 'Bronze',
+        icon: Trophy,
+        color: 'from-amber-700 to-amber-600',
+        badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
+      };
+    }
+  };
+
+  const getMilestoneMessage = (days: number) => {
+    const messages: Record<number, string> = {
+      5: "First Steps",
+      10: "Building Momentum",
+      20: "Habit Former",
+      40: "Dedicated Practitioner",
+      80: "Mindfulness Master",
+      160: "Living Legend",
+      365: "Year of Presence"
+    };
+    return messages[days] || `${days} Days`;
+  };
+
+  const isAchievementUnlocked = (milestone: number) => {
+    return achievements.some(a => a.milestone_days === milestone);
   };
 
   if (!user || !profile) {
@@ -140,6 +220,62 @@ export default function Profile() {
                 </div>
               </div>
 
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Achievements</CardTitle>
+            <CardDescription>
+              Your mindfulness journey milestones
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {milestones.map((milestone) => {
+                const unlocked = isAchievementUnlocked(milestone);
+                const tierInfo = getTierInfo(milestone);
+                const Icon = unlocked ? tierInfo.icon : Lock;
+                
+                return (
+                  <div
+                    key={milestone}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      unlocked
+                        ? 'bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/30'
+                        : 'bg-muted/30 border-muted opacity-50'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center text-center space-y-2">
+                      <Icon className={`h-8 w-8 ${unlocked ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div>
+                        <p className={`font-semibold ${unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          {milestone} Days
+                        </p>
+                        <p className={`text-xs ${unlocked ? 'text-muted-foreground' : 'text-muted-foreground/60'}`}>
+                          {getMilestoneMessage(milestone)}
+                        </p>
+                      </div>
+                      {unlocked && (
+                        <Badge className={tierInfo.badgeColor}>
+                          {tierInfo.tier}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-6 p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Days</p>
+                  <p className="text-2xl font-bold text-primary">{totalDays}</p>
+                </div>
+                <Trophy className="h-10 w-10 text-primary" />
+              </div>
             </div>
 
             <div className="pt-4 space-y-2">
