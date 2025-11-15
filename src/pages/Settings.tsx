@@ -262,61 +262,6 @@ export default function Settings() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Date & Time Settings</CardTitle>
-              <CardDescription>
-                Configure your timezone for daily alignment entries
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>Current date & time for alignments:</span>
-                </div>
-                <div className="text-lg font-semibold">{currentDateTime}</div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select value={timezone} onValueChange={setTimezone}>
-                  <SelectTrigger id="timezone">
-                    <SelectValue placeholder="Select timezone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {commonTimezones.map((tz) => (
-                      <SelectItem key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground">
-                  This timezone will be used when creating and displaying alignment entries
-                </p>
-              </div>
-
-              <Button 
-                onClick={handleSaveTimezone} 
-                disabled={savingTimezone}
-                className="w-full"
-              >
-                {savingTimezone ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Clock className="mr-2 h-4 w-4" />
-                    Save Timezone
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Notification Settings</CardTitle>
             <CardDescription>
@@ -420,6 +365,61 @@ export default function Settings() {
             <p className="text-xs mt-4 italic">
               Note: Full notification functionality requires the native app to be installed on your device.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Date & Time Settings</CardTitle>
+            <CardDescription>
+              Configure your timezone for daily alignment entries
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Current date & time for alignments:</span>
+              </div>
+              <div className="text-lg font-semibold">{currentDateTime}</div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Timezone</Label>
+              <Select value={timezone} onValueChange={setTimezone}>
+                <SelectTrigger id="timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {commonTimezones.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">
+                This timezone will be used when creating and displaying alignment entries
+              </p>
+            </div>
+
+            <Button 
+              onClick={handleSaveTimezone} 
+              disabled={savingTimezone}
+              className="w-full"
+            >
+              {savingTimezone ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Clock className="mr-2 h-4 w-4" />
+                  Save Timezone
+                </>
+              )}
+            </Button>
           </CardContent>
         </Card>
         </div>
