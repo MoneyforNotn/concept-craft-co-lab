@@ -398,9 +398,6 @@ export default function Settings() {
                   Dark
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Choose between light and dark theme
-              </p>
             </div>
           </CardContent>
         </Card>
