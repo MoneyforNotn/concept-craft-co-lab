@@ -2,29 +2,36 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bookmark, Calendar } from "lucide-react";
+import { ArrowLeft, Bookmark, Calendar, Filter } from "lucide-react";
 import { format } from "date-fns";
 
 export default function History() {
   const [alignments, setAlignments] = useState<any[]>([]);
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadAlignments();
-  }, []);
+  }, [showBookmarkedOnly]);
 
   const loadAlignments = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('daily_alignments')
         .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false });
+        .eq('user_id', user.id);
+
+      if (showBookmarkedOnly) {
+        query = query.eq('is_bookmarked', true);
+      }
+
+      const { data, error } = await query.order('date', { ascending: false });
 
       if (error) throw error;
       setAlignments(data || []);
@@ -52,21 +59,41 @@ export default function History() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-4xl mx-auto py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          
+          <Button
+            variant={showBookmarkedOnly ? "default" : "outline"}
+            onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
+            className="gap-2"
+          >
+            <Bookmark className={showBookmarkedOnly ? "fill-current" : ""} />
+            {showBookmarkedOnly ? "Show All" : "Bookmarked Only"}
+          </Button>
+        </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-2xl">Your Journey</CardTitle>
-            <CardDescription>
-              Reflect on your past alignments
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Your Journey</CardTitle>
+                <CardDescription>
+                  {showBookmarkedOnly ? "Your bookmarked alignments" : "Reflect on your past alignments"}
+                </CardDescription>
+              </div>
+              {showBookmarkedOnly && (
+                <Badge variant="secondary" className="gap-1">
+                  <Filter className="h-3 w-3" />
+                  Filtered
+                </Badge>
+              )}
+            </div>
           </CardHeader>
         </Card>
 
@@ -77,10 +104,14 @@ export default function History() {
         ) : alignments.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No alignments yet</p>
+              <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                {showBookmarkedOnly ? "No bookmarked alignments yet" : "No alignments yet"}
+              </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Create your first alignment to start your journey
+                {showBookmarkedOnly 
+                  ? "Bookmark alignments to see them here" 
+                  : "Create your first alignment to start your journey"}
               </p>
             </CardContent>
           </Card>
