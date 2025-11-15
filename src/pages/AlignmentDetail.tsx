@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Bookmark, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell } from "lucide-react";
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
 
@@ -133,13 +133,18 @@ export default function AlignmentDetail() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <Button variant="ghost" size="icon" onClick={toggleBookmark}>
-            <Bookmark
-              className={`h-5 w-5 ${
-                alignment.is_bookmarked ? 'fill-primary text-primary' : ''
-              }`}
-            />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
+              <Bell className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggleBookmark}>
+              <Bookmark
+                className={`h-5 w-5 ${
+                  alignment.is_bookmarked ? 'fill-primary text-primary' : ''
+                }`}
+              />
+            </Button>
+          </div>
         </div>
 
         <Card className="mb-6">
