@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
-import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun, Monitor } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 
@@ -380,7 +380,7 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Theme</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant={theme === "light" ? "default" : "outline"}
                   onClick={() => setTheme("light")}
@@ -397,17 +397,9 @@ export default function Settings() {
                   <Moon className="mr-2 h-4 w-4" />
                   Dark
                 </Button>
-                <Button
-                  variant={theme === "system" ? "default" : "outline"}
-                  onClick={() => setTheme("system")}
-                  className="w-full"
-                >
-                  <Monitor className="mr-2 h-4 w-4" />
-                  System
-                </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Choose between light, dark, or system theme that follows your device settings
+                Choose between light and dark theme
               </p>
             </div>
           </CardContent>
