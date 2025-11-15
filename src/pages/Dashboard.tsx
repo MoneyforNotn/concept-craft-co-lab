@@ -209,7 +209,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
         <div className="flex justify-between items-center pt-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 
+            className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate("/guide")}
+          >
             Mindful Presence
           </h1>
           <div className="flex items-center gap-2">
