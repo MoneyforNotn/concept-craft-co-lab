@@ -258,20 +258,13 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">Emotion</p>
                 <p className="text-xl font-medium">{alignment.emotion}</p>
               </div>
-              <div className="flex gap-2">
+              <div>
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="w-full"
                   onClick={() => navigate(`/alignment/${alignment.id}`)}
                 >
                   View Details
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => handleResetAlignment(alignment.id)}
-                >
-                  Reset
                 </Button>
               </div>
             </CardContent>
