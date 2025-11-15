@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Session } from "@supabase/supabase-js";
-import { ArrowLeft, LogOut, Mail, Calendar, User as UserIcon } from "lucide-react";
+import { ArrowLeft, LogOut, Mail, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -140,13 +140,6 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">User ID</p>
-                  <p className="font-medium text-sm font-mono">{user.id.substring(0, 8)}...</p>
-                </div>
-              </div>
             </div>
 
             <div className="pt-4 space-y-2">
