@@ -89,7 +89,7 @@ All colors MUST be HSL.
     top: 0;
     left: 0;
     right: 0;
-    height: 120px;
+    height: 80px;
     background: linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%);
     pointer-events: none;
     z-index: 9999;
