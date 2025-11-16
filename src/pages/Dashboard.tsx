@@ -11,6 +11,30 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getCurrentDate } from "@/lib/timezoneUtils";
 
+const quotes = [
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "Know thyself.", author: "Socrates" },
+  { text: "The only true wisdom is in knowing you know nothing.", author: "Socrates" },
+  { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
+  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" },
+  { text: "The mind is everything. What you think you become.", author: "Buddha" },
+  { text: "Peace comes from within. Do not seek it without.", author: "Buddha" },
+  { text: "You yourself, as much as anybody in the entire universe, deserve your love and affection.", author: "Buddha" },
+  { text: "He who knows others is wise; he who knows himself is enlightened.", author: "Lao Tzu" },
+  { text: "When I let go of what I am, I become what I might be.", author: "Lao Tzu" },
+  { text: "Life is really simple, but we insist on making it complicated.", author: "Confucius" },
+  { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+  { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+  { text: "What we think, we become.", author: "Buddha" },
+  { text: "Happiness is not something ready made. It comes from your own actions.", author: "Dalai Lama" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "The present moment is the only time over which we have dominion.", author: "Thích Nhất Hạnh" },
+  { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" }
+];
+
+
 export default function Dashboard() {
   const [user, setUser] = useState<UserType | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -18,9 +42,15 @@ export default function Dashboard() {
   const [todayAlignments, setTodayAlignments] = useState<any[]>([]);
   const [streakCount, setStreakCount] = useState(0);
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [quote, setQuote] = useState(quotes[0]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
+
+  useEffect(() => {
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    setQuote(randomQuote);
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -208,7 +238,13 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
-        <div className="flex justify-between items-center pt-6">
+        <div className="pt-20 pb-2 text-center">
+          <p className="text-sm italic text-muted-foreground">
+            "{quote.text}" — {quote.author}
+          </p>
+        </div>
+        
+        <div className="flex justify-between items-center">
           <h1 
             className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/guide")}
