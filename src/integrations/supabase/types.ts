@@ -53,7 +53,7 @@ export type Database = {
           is_bookmarked: boolean | null
           notes: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -64,7 +64,7 @@ export type Database = {
           is_bookmarked?: boolean | null
           notes?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -75,7 +75,7 @@ export type Database = {
           is_bookmarked?: boolean | null
           notes?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -130,7 +130,7 @@ export type Database = {
           is_random: boolean | null
           scheduled_times: string[] | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -139,7 +139,7 @@ export type Database = {
           is_random?: boolean | null
           scheduled_times?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -148,7 +148,7 @@ export type Database = {
           is_random?: boolean | null
           scheduled_times?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -166,21 +166,21 @@ export type Database = {
           created_at: string | null
           id: string
           question_key: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           answer: string
           created_at?: string | null
           id?: string
           question_key: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           answer?: string
           created_at?: string | null
           id?: string
           question_key?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
