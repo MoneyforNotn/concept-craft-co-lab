@@ -236,7 +236,14 @@ export default function AlignmentDetail() {
         <Card className="mb-6">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>{format(new Date(alignment.date), 'MMMM d, yyyy')}</CardTitle>
+              <CardTitle>
+                {(() => {
+                  // Parse date as local date to avoid timezone shifts
+                  const [year, month, day] = alignment.date.split('-').map(Number);
+                  const localDate = new Date(year, month - 1, day);
+                  return format(localDate, 'MMMM d, yyyy');
+                })()}
+              </CardTitle>
               {!isEditing && (
                 <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
                   <Edit2 className="h-4 w-4" />
