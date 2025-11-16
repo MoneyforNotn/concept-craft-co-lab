@@ -80,6 +80,19 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 9999;
   }
 
   #root {
