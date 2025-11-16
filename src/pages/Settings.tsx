@@ -272,11 +272,11 @@ export default function Settings() {
                   className="min-h-32"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <Button 
                   onClick={handleSaveMission} 
                   disabled={savingMission}
-                  className="flex-1"
+                  className="w-full"
                 >
                   {savingMission ? (
                     <>
@@ -293,7 +293,7 @@ export default function Settings() {
                 <Button 
                   variant="outline"
                   onClick={handleRetakeOnboarding}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Retake Questions
@@ -376,7 +376,7 @@ export default function Settings() {
               ) : (
                 <>
                   <Bell className="mr-2 h-4 w-4" />
-                  Save & Schedule Notifications
+                  Save & Schedule
                 </>
               )}
             </Button>
