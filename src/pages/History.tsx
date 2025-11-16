@@ -127,7 +127,7 @@ export default function History() {
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      {format(new Date(alignment.date), 'MMMM d, yyyy')}
+                      {format(new Date(alignment.created_at), 'MMMM d, yyyy')}
                     </div>
                     <Button
                       variant="ghost"
