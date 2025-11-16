@@ -13,6 +13,20 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
+import { z } from "zod";
+
+const missionSchema = z.object({
+  mission: z.string().trim().max(5000, "Personal mission must be less than 5000 characters"),
+});
+
+const timezoneSchema = z.object({
+  timezone: z.string().min(1, "Timezone is required"),
+});
+
+const notificationSchema = z.object({
+  frequencyCount: z.number().min(1).max(10),
+  scheduledTimes: z.array(z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")),
+});
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
@@ -82,6 +96,15 @@ export default function Settings() {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Validate notification settings
+      const validation = notificationSchema.safeParse({ 
+        frequencyCount, 
+        scheduledTimes 
+      });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -121,12 +144,20 @@ export default function Settings() {
   const handleSaveMission = async () => {
     setSavingMission(true);
     try {
+      // Validate personal mission
+      const validation = missionSchema.safeParse({ mission: personalMission });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const { error } = await supabase
         .from('profiles')
-        .update({ personal_mission: personalMission })
+        .update({
+          personal_mission: validation.data.mission,
+        })
         .eq('id', user.id);
 
       if (error) throw error;
@@ -177,12 +208,20 @@ export default function Settings() {
   const handleSaveTimezone = async () => {
     setSavingTimezone(true);
     try {
+      // Validate timezone
+      const validation = timezoneSchema.safeParse({ timezone });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const { error } = await supabase
         .from('profiles')
-        .update({ timezone })
+        .update({
+          timezone: validation.data.timezone,
+        })
         .eq('id', user.id);
 
       if (error) throw error;

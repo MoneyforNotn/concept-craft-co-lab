@@ -6,6 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles } from "lucide-react";
+import { z } from "zod";
+
+const responseSchema = z.object({
+  answer: z.string().trim().min(1, "Answer is required").max(5000, "Answer must be less than 5000 characters"),
+});
+
+const missionSchema = z.object({
+  mission: z.string().trim().min(1, "Personal mission cannot be empty").max(5000, "Personal mission must be less than 5000 characters"),
+});
 
 const QUESTIONS = [
   { key: "cant_live_without", question: "What is something I can't live without?" },
@@ -33,11 +42,14 @@ export default function Onboarding() {
   const currentAnswer = responses[QUESTIONS[currentQuestion]?.key] || "";
 
   const handleNext = () => {
-    if (!currentAnswer.trim()) {
+    // Validate current answer
+    const validation = responseSchema.safeParse({ answer: currentAnswer });
+    
+    if (!validation.success) {
       toast({
         variant: "destructive",
-        title: "Please provide an answer",
-        description: "Take a moment to reflect on this question.",
+        title: "Invalid input",
+        description: validation.error.errors[0].message,
       });
       return;
     }
@@ -79,6 +91,12 @@ export default function Onboarding() {
   const saveOnboarding = async () => {
     setLoading(true);
     try {
+      // Validate personal mission before saving
+      const validation = missionSchema.safeParse({ mission: personalMission });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -99,7 +117,7 @@ export default function Onboarding() {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          personal_mission: personalMission,
+          personal_mission: validation.data.mission,
           onboarding_completed: true,
         })
         .eq('id', user.id);

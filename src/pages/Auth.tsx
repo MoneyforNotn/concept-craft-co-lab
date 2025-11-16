@@ -7,6 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(100, "Password must be less than 100 characters"),
+});
+
+const emailSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+});
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,7 +33,13 @@ export default function Auth() {
 
     try {
       if (isForgotPassword) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        // Validate email for password reset
+        const emailValidation = emailSchema.safeParse({ email });
+        if (!emailValidation.success) {
+          throw new Error(emailValidation.error.errors[0].message);
+        }
+        
+        const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data.email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
@@ -34,16 +50,28 @@ export default function Auth() {
         setIsForgotPassword(false);
         setIsLogin(true);
       } else if (isLogin) {
+        // Validate credentials for login
+        const validation = authSchema.safeParse({ email, password });
+        if (!validation.success) {
+          throw new Error(validation.error.errors[0].message);
+        }
+        
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validation.data.email,
+          password: validation.data.password,
         });
         if (error) throw error;
         navigate("/");
       } else {
+        // Validate credentials for signup
+        const validation = authSchema.safeParse({ email, password });
+        if (!validation.success) {
+          throw new Error(validation.error.errors[0].message);
+        }
+        
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validation.data.email,
+          password: validation.data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
