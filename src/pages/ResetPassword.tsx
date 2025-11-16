@@ -7,57 +7,70 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const passwordSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters").max(100, "Password must be less than 100 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters").max(100, "Password must be less than 100 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     // Check if user arrived here via password reset link
-    supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
-        // User is in password recovery mode, show the form
-        console.log("Password recovery mode detected");
+        setIsRecoveryMode(true);
+        setCheckingSession(false);
+      } else if (event === "SIGNED_IN" && session) {
+        // Check if this is a recovery session
+        setCheckingSession(false);
       }
     });
+
+    // Also check current session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsRecoveryMode(true);
+      }
+      setCheckingSession(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same.",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
+      // Validate password inputs
+      const validation = passwordSchema.safeParse({ password, confirmPassword });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+
+      // Update the user's password
       const { error } = await supabase.auth.updateUser({
-        password: password,
+        password: validation.data.password,
       });
 
       if (error) throw error;
 
       toast({
         title: "Password updated!",
-        description: "Your password has been successfully reset.",
+        description: "Your password has been successfully reset. Please sign in with your new password.",
       });
 
       // Sign out and redirect to login
@@ -67,12 +80,45 @@ export default function ResetPassword() {
       toast({
         variant: "destructive",
         title: "Error resetting password",
-        description: error.message,
+        description: error.message || "Auth session missing! Please request a new password reset link.",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isRecoveryMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-destructive">
+              Invalid Reset Link
+            </CardTitle>
+            <CardDescription>
+              This password reset link is invalid or has expired. Please request a new one.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate("/auth")} 
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
@@ -82,7 +128,7 @@ export default function ResetPassword() {
             Reset Password
           </CardTitle>
           <CardDescription>
-            Enter your new password below
+            Enter your new password below (minimum 8 characters)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,8 +142,8 @@ export default function ResetPassword() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                minLength={6}
-                placeholder="At least 6 characters"
+                minLength={8}
+                placeholder="At least 8 characters"
               />
             </div>
             <div className="space-y-2">
@@ -109,7 +155,7 @@ export default function ResetPassword() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
-                minLength={6}
+                minLength={8}
                 placeholder="Re-enter your password"
               />
             </div>
