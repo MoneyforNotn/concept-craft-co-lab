@@ -4,10 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell } from "lucide-react";
+import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X } from "lucide-react";
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
+import { z } from "zod";
+
+const alignmentEditSchema = z.object({
+  intention: z.string().trim().min(1, "Intention is required").max(1000, "Intention must be less than 1000 characters"),
+  emotion: z.string().trim().min(1, "Emotion is required").max(1000, "Emotion must be less than 1000 characters"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+});
+
 
 export default function AlignmentDetail() {
   const { id } = useParams();
@@ -16,6 +26,10 @@ export default function AlignmentDetail() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [todayAlignmentCount, setTodayAlignmentCount] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedIntention, setEditedIntention] = useState("");
+  const [editedEmotion, setEditedEmotion] = useState("");
+  const [editedDate, setEditedDate] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,6 +48,9 @@ export default function AlignmentDetail() {
       if (error) throw error;
       setAlignment(data);
       setNotes(data.notes || "");
+      setEditedIntention(data.intention);
+      setEditedEmotion(data.emotion);
+      setEditedDate(data.date);
 
       // Check today's alignment count
       const { data: { user } } = await supabase.auth.getUser();
@@ -99,6 +116,59 @@ export default function AlignmentDetail() {
     }
   };
 
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      const validation = alignmentEditSchema.safeParse({
+        intention: editedIntention,
+        emotion: editedEmotion,
+        date: editedDate,
+      });
+
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+
+      const { error } = await supabase
+        .from('daily_alignments')
+        .update({
+          intention: validation.data.intention,
+          emotion: validation.data.emotion,
+          date: validation.data.date,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setAlignment({
+        ...alignment,
+        intention: validation.data.intention,
+        emotion: validation.data.emotion,
+        date: validation.data.date,
+      });
+      setIsEditing(false);
+
+      toast({
+        title: "Alignment updated",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating alignment",
+        description: error.message,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedIntention(alignment.intention);
+    setEditedEmotion(alignment.emotion);
+    setEditedDate(alignment.date);
+    setIsEditing(false);
+  };
+
   const toggleBookmark = async () => {
     try {
       const { error } = await supabase
@@ -149,17 +219,77 @@ export default function AlignmentDetail() {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>{format(new Date(alignment.date), 'MMMM d, yyyy')}</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>{format(new Date(alignment.date), 'MMMM d, yyyy')}</CardTitle>
+              {!isEditing && (
+                <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Intention</p>
-              <p className="text-2xl font-medium">{alignment.intention}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Emotion</p>
-              <p className="text-2xl font-medium">{alignment.emotion}</p>
-            </div>
+            {isEditing ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-date">Date</Label>
+                  <Input
+                    id="edit-date"
+                    type="date"
+                    value={editedDate}
+                    onChange={(e) => setEditedDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-intention">Intention</Label>
+                  <Input
+                    id="edit-intention"
+                    value={editedIntention}
+                    onChange={(e) => setEditedIntention(e.target.value)}
+                    placeholder="Your intention..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-emotion">Emotion</Label>
+                  <Input
+                    id="edit-emotion"
+                    value={editedEmotion}
+                    onChange={(e) => setEditedEmotion(e.target.value)}
+                    placeholder="Your emotion..."
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveEdit} disabled={saving} className="flex-1">
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                  <Button onClick={handleCancelEdit} variant="outline" className="flex-1">
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-sm text-muted-foreground">Intention</p>
+                  <p className="text-2xl font-medium">{alignment.intention}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Emotion</p>
+                  <p className="text-2xl font-medium">{alignment.emotion}</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
