@@ -129,12 +129,15 @@ export default function AlignmentDetail() {
         throw new Error(validation.error.errors[0].message);
       }
 
+      // Ensure date is in YYYY-MM-DD format without timezone conversion
+      const dateOnly = validation.data.date.split('T')[0];
+
       const { error } = await supabase
         .from('daily_alignments')
         .update({
           intention: validation.data.intention,
           emotion: validation.data.emotion,
-          date: validation.data.date,
+          date: dateOnly,
         })
         .eq('id', id);
 
@@ -144,13 +147,16 @@ export default function AlignmentDetail() {
         ...alignment,
         intention: validation.data.intention,
         emotion: validation.data.emotion,
-        date: validation.data.date,
+        date: dateOnly,
       });
       setIsEditing(false);
 
       toast({
         title: "Alignment updated",
       });
+      
+      // Reload to ensure we have fresh data
+      await loadAlignment();
     } catch (error: any) {
       toast({
         variant: "destructive",
