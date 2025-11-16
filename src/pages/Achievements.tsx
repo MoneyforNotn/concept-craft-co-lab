@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Trophy, Lock, Star, Award, Medal, Crown, Sparkles as SparklesIcon, Gem, Zap, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import confetti from 'canvas-confetti';
 
 interface Achievement {
   id: string;
@@ -31,6 +32,25 @@ export default function Achievements() {
   useEffect(() => {
     loadAchievements();
   }, []);
+
+  useEffect(() => {
+    // Trigger confetti for newly unlocked achievements (achieved in last 24 hours)
+    if (achievements.length > 0) {
+      const recentAchievements = achievements.filter(achievement => {
+        const achievedTime = new Date(achievement.achieved_at).getTime();
+        const now = Date.now();
+        const dayInMs = 24 * 60 * 60 * 1000;
+        return (now - achievedTime) < dayInMs;
+      });
+
+      if (recentAchievements.length > 0) {
+        // Slight delay to let the page render
+        setTimeout(() => {
+          triggerCelebration(recentAchievements[recentAchievements.length - 1].milestone_days);
+        }, 500);
+      }
+    }
+  }, [achievements]);
 
   const loadAchievements = async () => {
     try {
@@ -76,6 +96,75 @@ export default function Achievements() {
       console.error('Error loading achievements:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const triggerCelebration = (milestone: number) => {
+    const tierInfo = getTierInfo(milestone);
+    
+    // Different confetti styles based on tier
+    if (milestone === 365) {
+      // Epic celebration for year achievement
+      const duration = 5000;
+      const animationEnd = Date.now() + duration;
+      
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#9333ea', '#db2777', '#fbbf24']
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#9333ea', '#db2777', '#fbbf24']
+        });
+      }, 150);
+    } else if (milestone >= 80) {
+      // Gold/Diamond celebration
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: milestone === 160 ? ['#22d3ee', '#3b82f6', '#6366f1'] : ['#fbbf24', '#f59e0b', '#d97706']
+      });
+      
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: milestone === 160 ? ['#22d3ee', '#3b82f6'] : ['#fbbf24', '#f59e0b']
+        });
+        confetti({
+          particleCount: 100,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: milestone === 160 ? ['#3b82f6', '#6366f1'] : ['#f59e0b', '#d97706']
+        });
+      }, 250);
+    } else {
+      // Standard celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: milestone === 40 ? ['#94a3b8', '#64748b'] : 
+                milestone === 20 ? ['#f97316', '#ea580c'] : 
+                milestone === 10 ? ['#10b981', '#14b8a6'] : 
+                ['#3b82f6', '#60a5fa']
+      });
     }
   };
 
