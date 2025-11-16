@@ -9,6 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { getCurrentDate } from "@/lib/timezoneUtils";
+import { z } from "zod";
+
+const alignmentSchema = z.object({
+  intention: z.string().trim().min(1, "Intention is required").max(500, "Intention must be less than 500 characters"),
+  emotion: z.string().trim().min(1, "Emotion is required").max(100, "Emotion must be less than 100 characters"),
+});
 
 export default function CreateAlignment() {
   const [intention, setIntention] = useState("");
@@ -23,6 +29,12 @@ export default function CreateAlignment() {
     setLoading(true);
 
     try {
+      // Validate input
+      const validation = alignmentSchema.safeParse({ intention, emotion });
+      if (!validation.success) {
+        throw new Error(validation.error.errors[0].message);
+      }
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -54,8 +66,8 @@ export default function CreateAlignment() {
         .insert({
           user_id: user.id,
           date: today,
-          intention,
-          emotion,
+          intention: validation.data.intention,
+          emotion: validation.data.emotion,
         });
 
       if (error) throw error;
