@@ -5,10 +5,12 @@
  */
 export function getCurrentDate(timezone: string = 'local'): string {
   if (timezone === 'local') {
-    // Use browser's local timezone
-    return new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
-      .toISOString()
-      .split('T')[0];
+    // Use browser's local timezone - simply get the local date
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   
   // Use specific timezone
