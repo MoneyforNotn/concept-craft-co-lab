@@ -119,6 +119,8 @@ export default function AlignmentDetail() {
   const handleSaveEdit = async () => {
     setSaving(true);
     try {
+      console.log('Original editedDate:', editedDate);
+      
       const validation = alignmentEditSchema.safeParse({
         intention: editedIntention,
         emotion: editedEmotion,
@@ -129,8 +131,14 @@ export default function AlignmentDetail() {
         throw new Error(validation.error.errors[0].message);
       }
 
-      // Ensure date is in YYYY-MM-DD format without timezone conversion
-      const dateOnly = validation.data.date.split('T')[0];
+      // Ensure date is in YYYY-MM-DD format without any timezone conversion
+      // If editedDate already looks like YYYY-MM-DD, use it directly
+      let dateOnly = validation.data.date;
+      if (dateOnly.includes('T')) {
+        dateOnly = dateOnly.split('T')[0];
+      }
+      
+      console.log('Saving date to database:', dateOnly);
 
       const { error } = await supabase
         .from('daily_alignments')
@@ -149,6 +157,7 @@ export default function AlignmentDetail() {
         emotion: validation.data.emotion,
         date: dateOnly,
       });
+      setEditedDate(dateOnly);
       setIsEditing(false);
 
       toast({
@@ -158,6 +167,7 @@ export default function AlignmentDetail() {
       // Reload to ensure we have fresh data
       await loadAlignment();
     } catch (error: any) {
+      console.error('Error updating alignment:', error);
       toast({
         variant: "destructive",
         title: "Error updating alignment",
