@@ -198,6 +198,7 @@ export type Database = {
           id: string
           onboarding_completed: boolean | null
           personal_mission: string | null
+          show_quotes: boolean | null
           timezone: string | null
           tutorial_completed: boolean | null
         }
@@ -206,6 +207,7 @@ export type Database = {
           id: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          show_quotes?: boolean | null
           timezone?: string | null
           tutorial_completed?: boolean | null
         }
@@ -214,6 +216,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean | null
           personal_mission?: string | null
+          show_quotes?: boolean | null
           timezone?: string | null
           tutorial_completed?: boolean | null
         }

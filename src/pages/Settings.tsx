@@ -38,6 +38,7 @@ export default function Settings() {
   const [frequencyCount, setFrequencyCount] = useState(3);
   const [isRandom, setIsRandom] = useState(false);
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
+  const [showQuotes, setShowQuotes] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
@@ -67,13 +68,14 @@ export default function Settings() {
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('personal_mission, timezone')
+        .select('personal_mission, timezone, show_quotes')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
         setPersonalMission(profileData.personal_mission || "");
         setTimezone(profileData.timezone || "local");
+        setShowQuotes(profileData.show_quotes ?? true);
       }
 
       // Load notification settings
@@ -406,6 +408,54 @@ export default function Settings() {
             <p className="text-xs mt-4 italic">
               Note: Full notification functionality requires the native app to be installed on your device.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Display Preferences</CardTitle>
+            <CardDescription>
+              Customize what you see in the app
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="show-quotes">Inspirational Quotes</Label>
+                <p className="text-sm text-muted-foreground">
+                  Show quotes at the top of the Dashboard
+                </p>
+              </div>
+              <Switch
+                id="show-quotes"
+                checked={showQuotes}
+                onCheckedChange={async (checked) => {
+                  setShowQuotes(checked);
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const { error } = await supabase
+                      .from('profiles')
+                      .update({ show_quotes: checked })
+                      .eq('id', user.id);
+
+                    if (error) throw error;
+
+                    toast({
+                      title: checked ? "Quotes enabled" : "Quotes disabled",
+                    });
+                  } catch (error: any) {
+                    toast({
+                      variant: "destructive",
+                      title: "Error updating preference",
+                      description: error.message,
+                    });
+                    setShowQuotes(!checked);
+                  }
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
 
