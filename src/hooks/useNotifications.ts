@@ -39,15 +39,60 @@ export function useNotifications() {
       await LocalNotifications.cancel({ notifications: await getAllPendingNotifications() });
 
       const notifications: ScheduleOptions['notifications'] = [];
+      
+      // Gentle, fun, and encouraging notification messages
       const notificationMessages = [
-        "Time to check in with your intention 🌟",
-        "How are you embodying your alignment today? ✨",
-        "A gentle reminder to stay present 🧘",
-        "Remember your daily intention 💫",
-        "Take a moment to reflect on your emotion 🌈",
-        "You're doing great! Keep your intention close 🌺",
-        "A mindful pause for your alignment 🍃",
+        "Hey beautiful soul, how's your intention feeling today? 🌟",
+        "Quick check-in: Are you living your alignment right now? ✨",
+        "Pause for a breath... how are you embodying your intention? 🧘",
+        "Your daily reminder: You're exactly where you need to be 💫",
+        "Time to check in with yourself - how's your heart today? 💙",
+        "A gentle nudge from your future self: Stay aligned! 🌈",
+        "How's your emotional weather today? ⛅",
+        "You're doing amazing! Take a moment to feel your intention 🌺",
+        "Present moment check: Is your intention alive in you? 🍃",
+        "Your alignment is calling... will you answer? 📞✨",
+        "A mindful pause to honor your intention 🙏",
+        "Quick vibe check: How aligned do you feel? 🎯",
+        "Hey you! Remember that beautiful intention of yours? 💝",
+        "Time to sprinkle some intention into this moment ✨",
+        "Your daily alignment loves you - show it some love back! 💕",
+        "Gentle reminder: Your emotions are valid, your intention is powerful 🌊",
+        "How are you showing up for yourself today? 🌱",
+        "Take a breath, check in, stay aligned 🌬️",
+        "Your intention is your superpower - using it today? 🦸",
+        "A little love note from your aligned self 💌",
       ];
+      
+      // Select messages based on time of day for variety
+      const getMessageForTime = (hour: number): string => {
+        const morningMessages = [
+          "Good morning! How will you embody your intention today? ☀️",
+          "Rise and shine! Your alignment is ready for you 🌅",
+          "Fresh day, fresh alignment - how are you feeling? 🌄",
+        ];
+        
+        const afternoonMessages = [
+          "Midday check-in: Still aligned with your intention? 🌞",
+          "Afternoon pause: How's your alignment holding up? ☕",
+          "Quick afternoon refresh - reconnect with your intention 🌤️",
+        ];
+        
+        const eveningMessages = [
+          "Evening reflection: Did you honor your intention today? 🌙",
+          "Winding down... how did your alignment show up today? 🌆",
+          "As the day ends, celebrate your aligned moments ⭐",
+        ];
+        
+        if (hour >= 5 && hour < 12) {
+          return morningMessages[Math.floor(Math.random() * morningMessages.length)];
+        } else if (hour >= 12 && hour < 17) {
+          return afternoonMessages[Math.floor(Math.random() * afternoonMessages.length)];
+        } else if (hour >= 17 && hour < 22) {
+          return eveningMessages[Math.floor(Math.random() * eveningMessages.length)];
+        }
+        return notificationMessages[Math.floor(Math.random() * notificationMessages.length)];
+      };
 
       if (isRandom) {
         // Schedule random notifications throughout the day
@@ -71,12 +116,16 @@ export function useNotifications() {
 
           notifications.push({
             id: i + 1,
-            title: "Mindful Reminder",
-            body: notificationMessages[i % notificationMessages.length],
+            title: "Alignment Check-In",
+            body: getMessageForTime(hour),
             schedule: {
               at: scheduledDate,
               every: 'day',
             },
+            sound: 'default',
+            attachments: [],
+            actionTypeId: '',
+            extra: null,
           });
         }
       } else {
@@ -96,12 +145,16 @@ export function useNotifications() {
 
           notifications.push({
             id: index + 1,
-            title: "Mindful Reminder",
-            body: notificationMessages[index % notificationMessages.length],
+            title: "Alignment Check-In",
+            body: getMessageForTime(hours),
             schedule: {
               at: scheduledDate,
               every: 'day',
             },
+            sound: 'default',
+            attachments: [],
+            actionTypeId: '',
+            extra: null,
           });
         });
       }
