@@ -98,10 +98,13 @@ export default function Settings() {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Ensure we have the correct number of scheduled times
+      const timesToUse = isRandom ? scheduledTimes : scheduledTimes.slice(0, frequencyCount);
+      
       // Validate notification settings
       const validation = notificationSchema.safeParse({ 
         frequencyCount, 
-        scheduledTimes 
+        scheduledTimes: timesToUse 
       });
       if (!validation.success) {
         throw new Error(validation.error.errors[0].message);
@@ -116,17 +119,17 @@ export default function Settings() {
           user_id: user.id,
           frequency_count: frequencyCount,
           is_random: isRandom,
-          scheduled_times: scheduledTimes,
+          scheduled_times: timesToUse,
         });
 
       if (error) throw error;
 
-      // Schedule the notifications
-      await scheduleNotifications(frequencyCount, isRandom, scheduledTimes);
+      // Schedule the push notifications
+      await scheduleNotifications(frequencyCount, isRandom, timesToUse);
 
       toast({
         title: "Settings saved",
-        description: "Your notification preferences have been updated.",
+        description: `Push notifications scheduled for ${frequencyCount} daily reminder${frequencyCount > 1 ? 's' : ''}`,
       });
     } catch (error: any) {
       toast({
@@ -320,10 +323,29 @@ export default function Settings() {
                 min="1"
                 max="10"
                 value={frequencyCount}
-                onChange={(e) => setFrequencyCount(parseInt(e.target.value))}
+                onChange={(e) => {
+                  const newCount = parseInt(e.target.value);
+                  setFrequencyCount(newCount);
+                  
+                  // Adjust scheduled times array to match the new count
+                  if (!isRandom) {
+                    const currentTimes = [...scheduledTimes];
+                    if (newCount > currentTimes.length) {
+                      // Add more times if count increased
+                      const defaultTimes = ["09:00", "12:00", "15:00", "18:00", "21:00", "10:00", "13:00", "16:00", "19:00", "22:00"];
+                      while (currentTimes.length < newCount) {
+                        currentTimes.push(defaultTimes[currentTimes.length] || "12:00");
+                      }
+                    } else if (newCount < currentTimes.length) {
+                      // Remove excess times if count decreased
+                      currentTimes.splice(newCount);
+                    }
+                    setScheduledTimes(currentTimes);
+                  }
+                }}
               />
               <p className="text-sm text-muted-foreground">
-                How many times per day you'd like to be reminded
+                How many times per day you'd like to be reminded (1-10)
               </p>
             </div>
 
@@ -344,28 +366,26 @@ export default function Settings() {
               <div className="space-y-2">
                 <Label>Scheduled times</Label>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Set specific times for your reminders
+                  Set {frequencyCount} specific time{frequencyCount !== 1 ? 's' : ''} for your daily reminders
                 </p>
-                {scheduledTimes.map((time, index) => (
-                  <Input
-                    key={index}
-                    type="time"
-                    value={time}
-                    onChange={(e) => {
-                      const newTimes = [...scheduledTimes];
-                      newTimes[index] = e.target.value;
-                      setScheduledTimes(newTimes);
-                    }}
-                  />
+                {scheduledTimes.slice(0, frequencyCount).map((time, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="time"
+                      value={time}
+                      onChange={(e) => {
+                        const newTimes = [...scheduledTimes];
+                        newTimes[index] = e.target.value;
+                        setScheduledTimes(newTimes);
+                      }}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-muted-foreground w-16">
+                      #{index + 1}
+                    </span>
+                  </div>
                 ))}
-                {scheduledTimes.length < frequencyCount && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setScheduledTimes([...scheduledTimes, "12:00"])}
-                  >
-                    Add Time
-                  </Button>
-                )}
               </div>
             )}
 
