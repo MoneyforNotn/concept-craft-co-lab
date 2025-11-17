@@ -27,23 +27,40 @@ export default function ResetPassword() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user arrived here via password reset link
+    const handlePasswordRecovery = async () => {
+      try {
+        // Check for hash parameters (from email link)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const type = hashParams.get('type');
+
+        if (type === 'recovery' && accessToken) {
+          // We have a recovery token, set recovery mode
+          setIsRecoveryMode(true);
+          setCheckingSession(false);
+          return;
+        }
+
+        // If no hash params, check session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setIsRecoveryMode(true);
+        }
+        setCheckingSession(false);
+      } catch (error) {
+        console.error('Error checking recovery status:', error);
+        setCheckingSession(false);
+      }
+    };
+
+    handlePasswordRecovery();
+
+    // Also listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsRecoveryMode(true);
         setCheckingSession(false);
-      } else if (event === "SIGNED_IN" && session) {
-        // Check if this is a recovery session
-        setCheckingSession(false);
       }
-    });
-
-    // Also check current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsRecoveryMode(true);
-      }
-      setCheckingSession(false);
     });
 
     return () => subscription.unsubscribe();
