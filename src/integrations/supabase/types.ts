@@ -197,6 +197,7 @@ export type Database = {
           created_at: string | null
           id: string
           onboarding_completed: boolean | null
+          onesignal_player_id: string | null
           personal_mission: string | null
           show_quotes: boolean | null
           timezone: string | null
@@ -206,6 +207,7 @@ export type Database = {
           created_at?: string | null
           id: string
           onboarding_completed?: boolean | null
+          onesignal_player_id?: string | null
           personal_mission?: string | null
           show_quotes?: boolean | null
           timezone?: string | null
@@ -215,6 +217,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           onboarding_completed?: boolean | null
+          onesignal_player_id?: string | null
           personal_mission?: string | null
           show_quotes?: boolean | null
           timezone?: string | null
