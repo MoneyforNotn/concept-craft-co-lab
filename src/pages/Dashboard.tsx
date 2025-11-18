@@ -386,7 +386,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-3 gap-4 pb-6">
+        <div className="grid grid-cols-3 gap-4 pb-3">
           <Button
             variant="outline"
             className="h-24 flex flex-col gap-2"
