@@ -43,6 +43,8 @@ export default function Settings() {
   const [testNotificationTitle, setTestNotificationTitle] = useState("Test Notification");
   const [testNotificationMessage, setTestNotificationMessage] = useState("This is a test push notification from your app!");
   const [sendingTest, setSendingTest] = useState(false);
+  const [scheduleTestNotification, setScheduleTestNotification] = useState(false);
+  const [scheduledDateTime, setScheduledDateTime] = useState("");
   const [lastNotification, setLastNotification] = useState<{
     sent_at: string;
     player_id: string;
@@ -273,13 +275,65 @@ export default function Settings() {
   };
 
   const handleSendTestNotification = async () => {
+    if (!testNotificationTitle || !testNotificationMessage) {
+      toast({
+        title: "Error",
+        description: "Please fill in both title and message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (scheduleTestNotification) {
+      if (!scheduledDateTime) {
+        toast({
+          title: "Error",
+          description: "Please select a date and time for the scheduled notification",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const scheduledDate = new Date(scheduledDateTime);
+      const now = new Date();
+      
+      if (scheduledDate <= now) {
+        toast({
+          title: "Error",
+          description: "Scheduled time must be in the future",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setSendingTest(true);
     try {
       if (!playerId) {
         throw new Error("Push notifications not initialized. Please enable notifications first.");
       }
 
-      await sendPushNotification(testNotificationTitle, testNotificationMessage);
+      if (scheduleTestNotification && scheduledDateTime) {
+        // Send scheduled notification via edge function
+        const { error } = await supabase.functions.invoke('send-scheduled-test-notification', {
+          body: {
+            playerId: playerId,
+            title: testNotificationTitle,
+            message: testNotificationMessage,
+            scheduledTime: scheduledDateTime,
+          },
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Notification scheduled',
+          description: `Your test notification will be sent at ${new Date(scheduledDateTime).toLocaleString()}`,
+        });
+      } else {
+        // Send immediately
+        await sendPushNotification(testNotificationTitle, testNotificationMessage);
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -523,20 +577,56 @@ export default function Settings() {
                 />
               </div>
 
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="schedule-test"
+                  checked={scheduleTestNotification}
+                  onCheckedChange={setScheduleTestNotification}
+                />
+                <Label htmlFor="schedule-test" className="cursor-pointer">
+                  Schedule notification
+                </Label>
+              </div>
+
+              {scheduleTestNotification && (
+                <div className="space-y-2">
+                  <Label htmlFor="scheduled-time">Schedule Time</Label>
+                  <Input
+                    id="scheduled-time"
+                    type="datetime-local"
+                    value={scheduledDateTime}
+                    onChange={(e) => setScheduledDateTime(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Select when you want the test notification to be sent
+                  </p>
+                </div>
+              )}
+
               <Button 
                 onClick={handleSendTestNotification}
-                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage}
+                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage || (scheduleTestNotification && !scheduledDateTime)}
                 className="w-full"
               >
                 {sendingTest ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {scheduleTestNotification ? 'Scheduling...' : 'Sending...'}
                   </>
                 ) : (
                   <>
-                    <Bell className="mr-2 h-4 w-4" />
-                    Send Test Notification
+                    {scheduleTestNotification ? (
+                      <>
+                        <Clock className="mr-2 h-4 w-4" />
+                        Schedule Test Notification
+                      </>
+                    ) : (
+                      <>
+                        <Bell className="mr-2 h-4 w-4" />
+                        Send Test Notification Now
+                      </>
+                    )}
                   </>
                 )}
               </Button>
