@@ -40,10 +40,13 @@ export default function Settings() {
   const [isRandom, setIsRandom] = useState(false);
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
   const [showQuotes, setShowQuotes] = useState(true);
+  const [testNotificationTitle, setTestNotificationTitle] = useState("Test Notification");
+  const [testNotificationMessage, setTestNotificationMessage] = useState("This is a test push notification from your app!");
+  const [sendingTest, setSendingTest] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
-  const { playerId, isInitialized } = useDespiaPush();
+  const { playerId, isInitialized, sendPushNotification } = useDespiaPush();
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -248,6 +251,25 @@ export default function Settings() {
     }
   };
 
+  const handleSendTestNotification = async () => {
+    setSendingTest(true);
+    try {
+      if (!playerId) {
+        throw new Error("Push notifications not initialized. Please enable notifications first.");
+      }
+
+      await sendPushNotification(testNotificationTitle, testNotificationMessage);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error sending test notification",
+        description: error.message,
+      });
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-2xl mx-auto py-8">
@@ -420,6 +442,62 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+
+        {isInitialized && playerId && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Test Push Notification</CardTitle>
+              <CardDescription>
+                Send a test notification to this device
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="test-title">Notification Title</Label>
+                <Input
+                  id="test-title"
+                  value={testNotificationTitle}
+                  onChange={(e) => setTestNotificationTitle(e.target.value)}
+                  placeholder="Enter notification title"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="test-message">Notification Message</Label>
+                <Textarea
+                  id="test-message"
+                  value={testNotificationMessage}
+                  onChange={(e) => setTestNotificationMessage(e.target.value)}
+                  placeholder="Enter notification message"
+                  className="min-h-24"
+                />
+              </div>
+
+              <Button 
+                onClick={handleSendTestNotification}
+                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage}
+                className="w-full"
+              >
+                {sendingTest ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Send Test Notification
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                Player ID: {playerId}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
 
         <Card className="mt-6">
           <CardHeader>
