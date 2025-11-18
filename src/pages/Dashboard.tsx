@@ -273,6 +273,15 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-lg leading-relaxed italic">{profile.personal_mission}</p>
+          </CardContent>
+        </Card>
+
         {playerId && (
           <Card className="bg-muted/50 border-muted">
             <CardHeader>
@@ -287,15 +296,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
-
-        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg leading-relaxed italic">{profile.personal_mission}</p>
-          </CardContent>
-        </Card>
 
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
           <Card key={alignment.id}>
