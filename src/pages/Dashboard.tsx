@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { User as UserType, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
@@ -415,11 +415,20 @@ export default function Dashboard() {
 
         <Button
           variant="outline"
-          className="w-full mb-6"
+          className="w-full"
           onClick={() => navigate("/settings")}
         >
           <Settings className="mr-2 h-4 w-4" />
           Settings
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full mb-6"
+          onClick={() => navigate("/learn-more")}
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          Learn More
         </Button>
       </div>
     </div>
