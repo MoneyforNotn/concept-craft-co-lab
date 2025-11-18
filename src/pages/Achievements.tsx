@@ -366,6 +366,13 @@ export default function Achievements() {
                         </p>
                       </div>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4"
+                      onClick={() => navigate(`/select-milestone-alignment/${milestone}`)}
+                    >
+                      Change Featured Alignment
+                    </Button>
                   </CardContent>
                 )}
 
