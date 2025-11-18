@@ -311,7 +311,7 @@ export default function AlignmentDetail() {
                     placeholder="Your emotion..."
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button onClick={handleSaveEdit} disabled={saving} className="flex-1">
                     {saving ? (
                       <>
@@ -357,7 +357,7 @@ export default function AlignmentDetail() {
               placeholder="Add your thoughts, reflections, or how you embodied your alignment today..."
               className="min-h-32"
             />
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button onClick={handleSaveNotes} disabled={saving} className="flex-1">
                 {saving ? (
                   <>
