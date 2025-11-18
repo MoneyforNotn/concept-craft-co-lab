@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
@@ -42,6 +43,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
+  const { playerId, isInitialized } = useDespiaPush();
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -312,6 +314,11 @@ export default function Settings() {
             <CardTitle className="text-2xl">Notification Settings</CardTitle>
             <CardDescription>
               Customize when you receive mindfulness reminders
+              {isInitialized && playerId && (
+                <span className="block text-xs text-muted-foreground mt-1">
+                  Push notifications enabled ✓
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
