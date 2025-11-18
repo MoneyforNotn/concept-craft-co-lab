@@ -163,6 +163,7 @@ export type Database = {
       notification_settings: {
         Row: {
           created_at: string | null
+          enabled: boolean
           frequency_count: number | null
           id: string
           is_random: boolean | null
@@ -172,6 +173,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          enabled?: boolean
           frequency_count?: number | null
           id?: string
           is_random?: boolean | null
@@ -181,6 +183,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          enabled?: boolean
           frequency_count?: number | null
           id?: string
           is_random?: boolean | null

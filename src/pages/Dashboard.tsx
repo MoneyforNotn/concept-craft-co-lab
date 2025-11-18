@@ -124,11 +124,11 @@ export default function Dashboard() {
 
         const { data: settings } = await supabase
           .from('notification_settings')
-          .select('frequency_count')
+          .select('frequency_count, enabled')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        setHasNotifications(settings && settings.frequency_count > 0);
+        setHasNotifications(settings && settings.frequency_count > 0 && (settings.enabled ?? true));
       } catch (error) {
         console.error('Error checking notifications:', error);
       }
@@ -257,16 +257,27 @@ export default function Dashboard() {
             Mindful Presence
           </h1>
           <div className="flex items-center gap-2">
-            {hasNotifications && (
-              <Badge 
-                variant="secondary" 
-                className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() => navigate("/settings")}
-              >
-                <Bell className="h-3 w-3" />
-                Active
-              </Badge>
-            )}
+            <Badge 
+              variant={hasNotifications ? "secondary" : "outline"}
+              className={`gap-1 cursor-pointer transition-colors ${
+                hasNotifications 
+                  ? 'hover:bg-secondary/80' 
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
+              onClick={() => navigate("/settings")}
+            >
+              {hasNotifications ? (
+                <>
+                  <Bell className="h-3 w-3" />
+                  Active
+                </>
+              ) : (
+                <>
+                  <BellOff className="h-3 w-3" />
+                  Paused
+                </>
+              )}
+            </Badge>
             <Button variant="ghost" size="icon" onClick={() => navigate("/profile")}>
               <UserIcon className="h-5 w-5" />
             </Button>
