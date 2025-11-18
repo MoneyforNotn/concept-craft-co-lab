@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X } from "lucide-react";
+import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
 import { z } from "zod";
@@ -193,9 +194,38 @@ export default function AlignmentDetail() {
         .eq('id', id);
 
       if (error) throw error;
+
       setAlignment({ ...alignment, is_bookmarked: !alignment.is_bookmarked });
+      toast({
+        title: alignment.is_bookmarked ? "Bookmark removed" : "Bookmarked",
+      });
     } catch (error) {
-      console.error('Error toggling bookmark:', error);
+      toast({
+        variant: "destructive",
+        title: "Error updating bookmark",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('daily_alignments')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Alignment deleted",
+      });
+      navigate("/history");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting alignment",
+        description: error.message,
+      });
     }
   };
 
@@ -338,11 +368,38 @@ export default function AlignmentDetail() {
                   "Save Notes"
                 )}
               </Button>
-              <Button onClick={handleAddPhoto} variant="outline">
+              <Button onClick={handleAddPhoto} variant="outline" className="flex-1">
                 <Camera className="mr-2 h-4 w-4" />
                 Add Photo
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-destructive/50">
+          <CardContent className="pt-6">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Alignment
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Alignment?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your alignment entry.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
 
