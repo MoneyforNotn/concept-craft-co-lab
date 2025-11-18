@@ -125,6 +125,8 @@ export default function Settings() {
           frequency_count: frequencyCount,
           is_random: isRandom,
           scheduled_times: timesToUse,
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
