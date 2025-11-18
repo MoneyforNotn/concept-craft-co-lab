@@ -282,20 +282,18 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {playerId && (
-          <Card className="bg-muted/50 border-muted">
-            <CardHeader>
-              <CardTitle className="text-sm">Debug: OneSignal Player ID</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Input 
-                value={playerId} 
-                readOnly 
-                className="font-mono text-xs"
-              />
-            </CardContent>
-          </Card>
-        )}
+        <Card className="bg-muted/50 border-muted">
+          <CardHeader>
+            <CardTitle className="text-sm">Debug: OneSignal Player ID</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Input 
+              value={playerId || 'Not available yet'} 
+              readOnly 
+              className="font-mono text-xs"
+            />
+          </CardContent>
+        </Card>
 
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
           <Card key={alignment.id}>
