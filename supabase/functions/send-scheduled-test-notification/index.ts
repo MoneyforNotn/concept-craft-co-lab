@@ -42,16 +42,23 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Scheduled time is required');
     }
 
-    // Validate that scheduled time is in the future
+    // Parse the datetime string - it comes from datetime-local input which doesn't include timezone
+    // We need to treat it as the user's local time and convert to UTC
     const scheduledDate = new Date(scheduledTime);
-    const now = new Date();
     
-    if (scheduledDate <= now) {
-      throw new Error('Scheduled time must be in the future');
+    // Add a buffer of 1 minute to account for processing time
+    const now = new Date();
+    const minScheduledTime = new Date(now.getTime() + 60000); // 1 minute from now
+    
+    if (scheduledDate <= minScheduledTime) {
+      throw new Error('Scheduled time must be at least 1 minute in the future');
     }
 
     // Convert to Unix timestamp for OneSignal
     const sendAfter = Math.floor(scheduledDate.getTime() / 1000);
+    
+    console.log('Scheduled date:', scheduledDate.toISOString());
+    console.log('Send after timestamp:', sendAfter);
 
     const response = await fetch('https://onesignal.com/api/v1/notifications', {
       method: 'POST',
