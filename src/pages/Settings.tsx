@@ -296,11 +296,12 @@ export default function Settings() {
 
       const scheduledDate = new Date(scheduledDateTime);
       const now = new Date();
+      const minScheduledTime = new Date(now.getTime() + 60000); // 1 minute from now
       
-      if (scheduledDate <= now) {
+      if (scheduledDate <= minScheduledTime) {
         toast({
           title: "Error",
-          description: "Scheduled time must be in the future",
+          description: "Scheduled time must be at least 1 minute in the future",
           variant: "destructive",
         });
         return;
@@ -596,10 +597,10 @@ export default function Settings() {
                     type="datetime-local"
                     value={scheduledDateTime}
                     onChange={(e) => setScheduledDateTime(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Select when you want the test notification to be sent
+                    Select when you want the test notification to be sent (at least 1 minute from now)
                   </p>
                 </div>
               )}
