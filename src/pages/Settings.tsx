@@ -39,6 +39,7 @@ export default function Settings() {
   const [frequencyCount, setFrequencyCount] = useState(3);
   const [isRandom, setIsRandom] = useState(false);
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showQuotes, setShowQuotes] = useState(true);
   const [testNotificationTitle, setTestNotificationTitle] = useState("Test Notification");
   const [testNotificationMessage, setTestNotificationMessage] = useState("This is a test push notification from your app!");
@@ -102,6 +103,7 @@ export default function Settings() {
         setFrequencyCount(data.frequency_count);
         setIsRandom(data.is_random);
         setScheduledTimes(data.scheduled_times || ["09:00", "13:00", "18:00"]);
+        setNotificationsEnabled(data.enabled ?? true);
       }
 
       // Load last notification log
@@ -146,6 +148,7 @@ export default function Settings() {
           frequency_count: frequencyCount,
           is_random: isRandom,
           scheduled_times: timesToUse,
+          enabled: notificationsEnabled,
         }, {
           onConflict: 'user_id'
         });
@@ -172,6 +175,56 @@ export default function Settings() {
 
   const handleCancelNotifications = async () => {
     await cancelAllNotifications();
+  };
+
+  const handleToggleNotifications = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const newEnabledState = !notificationsEnabled;
+
+      // Update notification settings
+      const { error } = await supabase
+        .from('notification_settings')
+        .upsert({
+          user_id: user.id,
+          enabled: newEnabledState,
+          frequency_count: frequencyCount,
+          is_random: isRandom,
+          scheduled_times: scheduledTimes.slice(0, frequencyCount),
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      setNotificationsEnabled(newEnabledState);
+
+      if (!newEnabledState) {
+        // Cancel all scheduled notifications
+        await cancelAllNotifications();
+      } else {
+        // Schedule notifications
+        await scheduleNotifications(frequencyCount, isRandom, scheduledTimes.slice(0, frequencyCount));
+      }
+
+      toast({
+        title: newEnabledState ? "Notifications enabled" : "Notifications disabled",
+        description: newEnabledState 
+          ? "Your daily reminders are now active" 
+          : "All scheduled notifications have been cancelled",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveMission = async () => {
@@ -494,7 +547,7 @@ export default function Settings() {
               </div>
             )}
 
-            <Button onClick={handleSave} className="w-full" disabled={loading}>
+            <Button onClick={handleSave} className="w-full" disabled={loading || !notificationsEnabled}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -508,14 +561,30 @@ export default function Settings() {
               )}
             </Button>
             
-            <Button
-              variant="outline"
-              onClick={handleCancelNotifications}
-              className="w-full gap-2"
-            >
-              <BellOff className="h-4 w-4" />
-              Cancel All Notifications
-            </Button>
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+              <div className="flex items-center gap-3">
+                {notificationsEnabled ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div>
+                  <p className="font-medium">
+                    {notificationsEnabled ? "Notifications Active" : "Notifications Paused"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {notificationsEnabled 
+                      ? "Daily reminders are enabled" 
+                      : "All notifications are currently disabled"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={notificationsEnabled}
+                onCheckedChange={handleToggleNotifications}
+                disabled={loading}
+              />
+            </div>
 
             {lastNotification && (
               <div className="mt-4 p-4 rounded-lg border bg-muted/50">
