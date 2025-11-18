@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { User as UserType, Session } from "@supabase/supabase-js";
 import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { getCurrentDate } from "@/lib/timezoneUtils";
 
 const quotes = [
@@ -46,6 +48,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
+  const { playerId } = useDespiaPush();
 
   useEffect(() => {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -269,6 +272,21 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
+
+        {playerId && (
+          <Card className="bg-muted/50 border-muted">
+            <CardHeader>
+              <CardTitle className="text-sm">Debug: OneSignal Player ID</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input 
+                value={playerId} 
+                readOnly 
+                className="font-mono text-xs"
+              />
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
           <CardHeader>
