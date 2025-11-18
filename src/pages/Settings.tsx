@@ -43,6 +43,12 @@ export default function Settings() {
   const [testNotificationTitle, setTestNotificationTitle] = useState("Test Notification");
   const [testNotificationMessage, setTestNotificationMessage] = useState("This is a test push notification from your app!");
   const [sendingTest, setSendingTest] = useState(false);
+  const [lastNotification, setLastNotification] = useState<{
+    sent_at: string;
+    player_id: string;
+    message: string;
+    status: string;
+  } | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
@@ -94,6 +100,19 @@ export default function Settings() {
         setFrequencyCount(data.frequency_count);
         setIsRandom(data.is_random);
         setScheduledTimes(data.scheduled_times || ["09:00", "13:00", "18:00"]);
+      }
+
+      // Load last notification log
+      const { data: lastLog } = await supabase
+        .from('notification_logs')
+        .select('sent_at, player_id, message, status')
+        .eq('user_id', user.id)
+        .order('sent_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastLog) {
+        setLastNotification(lastLog);
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -442,6 +461,35 @@ export default function Settings() {
               <BellOff className="h-4 w-4" />
               Cancel All Notifications
             </Button>
+
+            {lastNotification && (
+              <div className="mt-4 p-4 rounded-lg border bg-muted/50">
+                <p className="text-sm font-medium mb-2">Last Scheduled Notification</p>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>
+                    <span className="font-medium">Sent:</span>{' '}
+                    {new Date(lastNotification.sent_at).toLocaleString()}
+                  </p>
+                  <p>
+                    <span className="font-medium">Player ID:</span>{' '}
+                    {lastNotification.player_id}
+                  </p>
+                  <p>
+                    <span className="font-medium">Status:</span>{' '}
+                    <span className={
+                      lastNotification.status === 'success' 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-red-600 dark:text-red-400'
+                    }>
+                      {lastNotification.status}
+                    </span>
+                  </p>
+                  <p className="mt-2">
+                    <span className="font-medium">Message:</span> {lastNotification.message}
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

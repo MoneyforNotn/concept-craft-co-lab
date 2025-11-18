@@ -163,13 +163,46 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (response.ok) {
           console.log(`Notification sent to user ${notification.userId}`);
+          
+          // Log successful notification
+          await supabase
+            .from('notification_logs')
+            .insert({
+              user_id: notification.userId,
+              player_id: notification.playerId,
+              message: message,
+              status: 'success',
+            });
+          
           results.push({ userId: notification.userId, success: true });
         } else {
           console.error(`Failed to send notification to user ${notification.userId}:`, data);
+          
+          // Log failed notification
+          await supabase
+            .from('notification_logs')
+            .insert({
+              user_id: notification.userId,
+              player_id: notification.playerId,
+              message: message,
+              status: 'failed',
+            });
+          
           results.push({ userId: notification.userId, success: false, error: data });
         }
       } catch (error: any) {
         console.error(`Error sending notification to user ${notification.userId}:`, error);
+        
+        // Log error
+        await supabase
+          .from('notification_logs')
+          .insert({
+            user_id: notification.userId,
+            player_id: notification.playerId,
+            message: message,
+            status: 'error',
+          });
+        
         results.push({ userId: notification.userId, success: false, error: error.message });
       }
     }
