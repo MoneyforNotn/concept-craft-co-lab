@@ -60,6 +60,8 @@ export default function SelectMilestoneAlignment() {
           user_id: user.id,
           milestone_days: parseInt(milestone),
           alignment_id: selectedId,
+        }, {
+          onConflict: 'user_id,milestone_days'
         });
 
       if (error) throw error;
