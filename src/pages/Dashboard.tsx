@@ -282,16 +282,19 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-muted/50 border-muted">
+        <Card className="bg-destructive/10 border-destructive">
           <CardHeader>
-            <CardTitle className="text-sm">Debug: OneSignal Player ID</CardTitle>
+            <CardTitle className="text-sm text-destructive">🔍 DEBUG: OneSignal Player ID</CardTitle>
           </CardHeader>
           <CardContent>
             <Input 
-              value={playerId || 'Not available yet'} 
+              value={playerId || 'OneSignal player ID not available'} 
               readOnly 
-              className="font-mono text-xs"
+              className="font-mono text-xs bg-background"
             />
+            <p className="text-xs text-muted-foreground mt-2">
+              Status: {playerId ? '✅ Connected' : '❌ Not initialized'}
+            </p>
           </CardContent>
         </Card>
 
