@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TestNotificationProvider } from "@/contexts/TestNotificationContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -24,26 +25,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/create-alignment" element={<CreateAlignment />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/alignment/:id" element={<AlignmentDetail />} />
-          <Route path="/guide" element={<Guide />} />
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="/select-milestone-alignment/:milestone" element={<SelectMilestoneAlignment />} />
-          <Route path="/learn-more" element={<LearnMore />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <TestNotificationProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/create-alignment" element={<CreateAlignment />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/alignment/:id" element={<AlignmentDetail />} />
+            <Route path="/guide" element={<Guide />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="/select-milestone-alignment/:milestone" element={<SelectMilestoneAlignment />} />
+            <Route path="/learn-more" element={<LearnMore />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TestNotificationProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

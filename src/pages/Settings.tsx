@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
-import { useTestNotificationCountdown } from "@/hooks/useTestNotificationCountdown";
+import { useTestNotification } from "@/contexts/TestNotificationContext";
 import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun, Play, Pause } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
@@ -60,7 +60,7 @@ export default function Settings() {
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
   const { playerId, isInitialized, sendPushNotification } = useDespiaPush();
   const { theme, setTheme } = useTheme();
-  const { countdown, isPaused, resetCountdown, togglePause } = useTestNotificationCountdown();
+  const { countdown, isPaused, resetCountdown, togglePause } = useTestNotification();
 
   useEffect(() => {
     loadSettings();
