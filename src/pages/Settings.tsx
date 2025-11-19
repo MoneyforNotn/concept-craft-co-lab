@@ -54,6 +54,8 @@ export default function Settings() {
     message: string;
     status: string;
   } | null>(null);
+  const [countdown, setCountdown] = useState<number>(0);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
@@ -75,6 +77,31 @@ export default function Settings() {
     
     return () => clearInterval(interval);
   }, [timezone]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!isCountdownActive) return;
+
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && isCountdownActive) {
+      // Timer hit 0, send notification
+      handleSendTestNotification();
+      // Generate new random countdown and restart
+      const newCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+      setCountdown(newCountdown);
+    }
+  }, [countdown, isCountdownActive]);
+
+  // Initialize countdown on mount
+  useEffect(() => {
+    const initialCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+    setCountdown(initialCountdown);
+    setIsCountdownActive(true);
+  }, []);
 
   const loadSettings = async () => {
     try {
@@ -653,12 +680,40 @@ export default function Settings() {
         {isInitialized && playerId && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Test Push Notification</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Test Push Notification
+              </CardTitle>
               <CardDescription>
                 Send a test notification to this device
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Countdown Timer */}
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Auto-Send Timer</p>
+                    <p className="text-xs text-muted-foreground">Next notification in:</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl font-bold tabular-nums text-primary">
+                    {countdown}s
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newCountdown = Math.floor(Math.random() * 16) + 5;
+                      setCountdown(newCountdown);
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="test-title">Notification Title</Label>
                 <Input
