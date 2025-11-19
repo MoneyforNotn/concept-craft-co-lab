@@ -58,7 +58,7 @@ export default function Settings() {
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
   const { playerId, isInitialized, sendPushNotification } = useDespiaPush();
   const { theme, setTheme } = useTheme();
-  const { countdown, isPaused, resetCountdown, togglePause } = useTestNotification();
+  const { timer1, timer2 } = useTestNotification();
 
   useEffect(() => {
     loadSettings();
@@ -448,35 +448,55 @@ export default function Settings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Countdown Timer */}
-              <div className="flex items-center justify-between p-4 bg-muted rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-primary" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                   <div>
-                    <p className="text-sm font-medium">Auto-Send Timer {isPaused && "(Paused)"}</p>
-                    <p className="text-xs text-muted-foreground">Next notification in:</p>
+                    <p className="text-sm font-medium">Auto-Timer 1 (5-20s)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Next notification in: {timer1.countdown}s
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={timer1.togglePause}
+                    >
+                      {timer1.isPaused ? "Resume" : "Pause"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={timer1.resetCountdown}
+                    >
+                      Reset
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold tabular-nums text-primary">
-                    {countdown}s
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={togglePause}
-                    title={isPaused ? "Resume" : "Pause"}
-                  >
-                    {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={resetCountdown}
-                    title="Reset to new random time"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
+
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Auto-Timer 2 (60-120m)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Next notification in: {Math.floor(timer2.countdown / 60)}m {timer2.countdown % 60}s
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={timer2.togglePause}
+                    >
+                      {timer2.isPaused ? "Resume" : "Pause"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={timer2.resetCountdown}
+                    >
+                      Reset
+                    </Button>
+                  </div>
                 </div>
               </div>
               <Button 
