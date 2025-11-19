@@ -680,64 +680,27 @@ export default function Settings() {
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="schedule-test"
-                  checked={scheduleTestNotification}
-                  onCheckedChange={setScheduleTestNotification}
-                />
-                <Label htmlFor="schedule-test" className="cursor-pointer">
-                  Schedule notification
-                </Label>
-              </div>
-
-              {scheduleTestNotification && (
-                <div className="space-y-2">
-                  <Label htmlFor="scheduled-time">
-                    Schedule Time
-                    <span className="text-xs text-muted-foreground ml-2">
-                      (Current: {currentDateTime})
-                    </span>
-                  </Label>
-                  <Input
-                    id="scheduled-time"
-                    type="datetime-local"
-                    value={scheduledDateTime}
-                    onChange={(e) => setScheduledDateTime(e.target.value)}
-                    step="60"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Time must be at least 1 minute in the future
-                  </p>
-                </div>
-              )}
-
               <Button 
                 onClick={handleSendTestNotification}
-                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage || (scheduleTestNotification && !scheduledDateTime)}
+                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage}
                 className="w-full"
               >
                 {sendingTest ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {scheduleTestNotification ? 'Scheduling...' : 'Sending...'}
+                    Sending...
                   </>
                 ) : (
                   <>
-                    {scheduleTestNotification ? (
-                      <>
-                        <Clock className="mr-2 h-4 w-4" />
-                        Schedule Test Notification
-                      </>
-                    ) : (
-                      <>
-                        <Bell className="mr-2 h-4 w-4" />
-                        Send Test Notification Now
-                      </>
-                    )}
+                    <Bell className="mr-2 h-4 w-4" />
+                    Send Test Notification Now
                   </>
                 )}
               </Button>
+
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Note: Test notifications are sent immediately to your device
+              </p>
 
               <p className="text-xs text-muted-foreground">
                 Player ID: {playerId}
