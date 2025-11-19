@@ -42,8 +42,6 @@ export default function Settings() {
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showQuotes, setShowQuotes] = useState(true);
-  const [testNotificationTitle, setTestNotificationTitle] = useState("Test Notification");
-  const [testNotificationMessage, setTestNotificationMessage] = useState("This is a test push notification from your app!");
   const [sendingTest, setSendingTest] = useState(false);
   const [scheduleTestNotification, setScheduleTestNotification] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState("");
@@ -332,70 +330,39 @@ export default function Settings() {
   };
 
   const handleSendTestNotification = async () => {
-    if (!testNotificationTitle || !testNotificationMessage) {
-      toast({
-        title: "Error",
-        description: "Please fill in both title and message",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (scheduleTestNotification) {
-      if (!scheduledDateTime) {
-        toast({
-          title: "Error",
-          description: "Please select a date and time for the scheduled notification",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const scheduledDate = new Date(scheduledDateTime);
-      const now = new Date();
-      const minScheduledTime = new Date(now.getTime() + 60000); // 1 minute from now
-      
-      if (scheduledDate <= minScheduledTime) {
-        toast({
-          title: "Error",
-          description: "Scheduled time must be at least 1 minute in the future",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
     setSendingTest(true);
     try {
       if (!playerId) {
         throw new Error("Push notifications not initialized. Please enable notifications first.");
       }
 
-      if (scheduleTestNotification && scheduledDateTime) {
-        // Convert local datetime to ISO string with timezone
-        const localDate = new Date(scheduledDateTime);
-        const isoString = localDate.toISOString();
-        
-        // Send scheduled notification via edge function
-        const { error } = await supabase.functions.invoke('send-scheduled-test-notification', {
-          body: {
-            playerId: playerId,
-            title: testNotificationTitle,
-            message: testNotificationMessage,
-            scheduledTime: isoString,
-          },
-        });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
 
-        if (error) throw error;
+      // Randomly select one of the alignment reminder messages
+      const messages = [
+        "Pause what you're doing for a moment",
+        "Take a deep breath and recall your intention and emotion",
+        "Notice how you're showing up in the present moment",
+        "Gently adjust your awareness and energy if needed"
+      ];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 
-        toast({
-          title: 'Notification scheduled',
-          description: `Your test notification will be sent at ${new Date(scheduledDateTime).toLocaleString()}`,
-        });
-      } else {
-        // Send immediately
-        await sendPushNotification(testNotificationTitle, testNotificationMessage);
-      }
+      const { error } = await supabase.functions.invoke('send-scheduled-test-notification', {
+        body: {
+          userId: user.id,
+          playerId: playerId,
+          title: "Daily Alignment Reminder",
+          message: randomMessage,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test notification sent",
+        description: "Check your device for the notification",
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -695,30 +662,9 @@ export default function Settings() {
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="test-title">Notification Title</Label>
-                <Input
-                  id="test-title"
-                  value={testNotificationTitle}
-                  onChange={(e) => setTestNotificationTitle(e.target.value)}
-                  placeholder="Enter notification title"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="test-message">Notification Message</Label>
-                <Textarea
-                  id="test-message"
-                  value={testNotificationMessage}
-                  onChange={(e) => setTestNotificationMessage(e.target.value)}
-                  placeholder="Enter notification message"
-                  className="min-h-24"
-                />
-              </div>
-
               <Button 
                 onClick={handleSendTestNotification}
-                disabled={sendingTest || !testNotificationTitle || !testNotificationMessage}
+                disabled={sendingTest}
                 className="w-full"
               >
                 {sendingTest ? (
