@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 
-export const useTestNotificationCountdown = () => {
+export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: number) => {
   const [countdown, setCountdown] = useState<number>(0);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -65,22 +65,22 @@ export const useTestNotificationCountdown = () => {
       // Timer hit 0, send notification
       sendTestNotification();
       // Generate new random countdown and restart
-      const newCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+      const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
       setCountdown(newCountdown);
     }
-  }, [countdown, isCountdownActive, isPaused, sendTestNotification]);
+  }, [countdown, isCountdownActive, isPaused, sendTestNotification, minSeconds, maxSeconds]);
 
   // Initialize countdown on mount
   useEffect(() => {
-    const initialCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+    const initialCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
     setCountdown(initialCountdown);
     setIsCountdownActive(true);
-  }, []);
+  }, [minSeconds, maxSeconds]);
 
   const resetCountdown = useCallback(() => {
-    const newCountdown = Math.floor(Math.random() * 16) + 5;
+    const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
     setCountdown(newCountdown);
-  }, []);
+  }, [minSeconds, maxSeconds]);
 
   const togglePause = useCallback(() => {
     setIsPaused(prev => !prev);
