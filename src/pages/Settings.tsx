@@ -46,6 +46,8 @@ export default function Settings() {
   const [sendingTest, setSendingTest] = useState(false);
   const [scheduleTestNotification, setScheduleTestNotification] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState("");
+  const [useCustomMessage, setUseCustomMessage] = useState(false);
+  const [customNotificationMessage, setCustomNotificationMessage] = useState("");
   const [lastNotification, setLastNotification] = useState<{
     sent_at: string;
     player_id: string;
@@ -368,13 +370,17 @@ export default function Settings() {
       }
 
       if (scheduleTestNotification && scheduledDateTime) {
+        // Convert local datetime to ISO string with timezone
+        const localDate = new Date(scheduledDateTime);
+        const isoString = localDate.toISOString();
+        
         // Send scheduled notification via edge function
         const { error } = await supabase.functions.invoke('send-scheduled-test-notification', {
           body: {
             playerId: playerId,
             title: testNotificationTitle,
             message: testNotificationMessage,
-            scheduledTime: scheduledDateTime,
+            scheduledTime: isoString,
           },
         });
 
@@ -473,6 +479,33 @@ export default function Settings() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+              <div className="space-y-0.5">
+                <Label htmlFor="custom-message">Custom Notification Message</Label>
+                <p className="text-sm text-muted-foreground">
+                  Use your own message instead of AI-generated ones
+                </p>
+              </div>
+              <Switch
+                id="custom-message"
+                checked={useCustomMessage}
+                onCheckedChange={setUseCustomMessage}
+              />
+            </div>
+
+            {useCustomMessage && (
+              <div className="space-y-2">
+                <Label htmlFor="custom-message-text">Your Custom Message</Label>
+                <Textarea
+                  id="custom-message-text"
+                  value={customNotificationMessage}
+                  onChange={(e) => setCustomNotificationMessage(e.target.value)}
+                  placeholder="Enter the message you want to receive in your notifications..."
+                  className="min-h-20"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="frequency">Daily reminders</Label>
               <Input
@@ -660,16 +693,21 @@ export default function Settings() {
 
               {scheduleTestNotification && (
                 <div className="space-y-2">
-                  <Label htmlFor="scheduled-time">Schedule Time</Label>
+                  <Label htmlFor="scheduled-time">
+                    Schedule Time
+                    <span className="text-xs text-muted-foreground ml-2">
+                      (Current: {currentDateTime})
+                    </span>
+                  </Label>
                   <Input
                     id="scheduled-time"
                     type="datetime-local"
                     value={scheduledDateTime}
                     onChange={(e) => setScheduledDateTime(e.target.value)}
-                    min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                    step="60"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Select when you want the test notification to be sent (at least 1 minute from now)
+                    Time must be at least 1 minute in the future
                   </p>
                 </div>
               )}
