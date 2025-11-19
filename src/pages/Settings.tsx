@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
-import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun } from "lucide-react";
+import { useTestNotificationCountdown } from "@/hooks/useTestNotificationCountdown";
+import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun, Play, Pause } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
@@ -54,13 +55,12 @@ export default function Settings() {
     message: string;
     status: string;
   } | null>(null);
-  const [countdown, setCountdown] = useState<number>(0);
-  const [isCountdownActive, setIsCountdownActive] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { scheduleNotifications, cancelAllNotifications } = useNotifications();
   const { playerId, isInitialized, sendPushNotification } = useDespiaPush();
   const { theme, setTheme } = useTheme();
+  const { countdown, isPaused, resetCountdown, togglePause } = useTestNotificationCountdown();
 
   useEffect(() => {
     loadSettings();
@@ -77,31 +77,6 @@ export default function Settings() {
     
     return () => clearInterval(interval);
   }, [timezone]);
-
-  // Countdown timer effect
-  useEffect(() => {
-    if (!isCountdownActive) return;
-
-    if (countdown > 0) {
-      const timer = setTimeout(() => {
-        setCountdown(countdown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (countdown === 0 && isCountdownActive) {
-      // Timer hit 0, send notification
-      handleSendTestNotification();
-      // Generate new random countdown and restart
-      const newCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
-      setCountdown(newCountdown);
-    }
-  }, [countdown, isCountdownActive]);
-
-  // Initialize countdown on mount
-  useEffect(() => {
-    const initialCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
-    setCountdown(initialCountdown);
-    setIsCountdownActive(true);
-  }, []);
 
   const loadSettings = async () => {
     try {
@@ -694,7 +669,7 @@ export default function Settings() {
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-sm font-medium">Auto-Send Timer</p>
+                    <p className="text-sm font-medium">Auto-Send Timer {isPaused && "(Paused)"}</p>
                     <p className="text-xs text-muted-foreground">Next notification in:</p>
                   </div>
                 </div>
@@ -705,10 +680,16 @@ export default function Settings() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      const newCountdown = Math.floor(Math.random() * 16) + 5;
-                      setCountdown(newCountdown);
-                    }}
+                    onClick={togglePause}
+                    title={isPaused ? "Resume" : "Pause"}
+                  >
+                    {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetCountdown}
+                    title="Reset to new random time"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </Button>
