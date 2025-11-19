@@ -293,21 +293,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-destructive/10 border-destructive">
-          <CardHeader>
-            <CardTitle className="text-sm text-destructive">🔍 DEBUG: OneSignal Player ID</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Input 
-              value={playerId || 'OneSignal player ID not available'} 
-              readOnly 
-              className="font-mono text-xs bg-background"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Status: {playerId ? '✅ Connected' : '❌ Not initialized'}
-            </p>
-          </CardContent>
-        </Card>
 
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
           <Card key={alignment.id}>
