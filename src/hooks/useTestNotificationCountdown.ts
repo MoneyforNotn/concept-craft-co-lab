@@ -1,0 +1,99 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useDespiaPush } from "@/hooks/useDespiaPush";
+
+export const useTestNotificationCountdown = () => {
+  const [countdown, setCountdown] = useState<number>(0);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const { toast } = useToast();
+  const { playerId, sendPushNotification } = useDespiaPush();
+
+  // Send test notification function
+  const sendTestNotification = useCallback(async () => {
+    if (!playerId) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
+
+      const { data, error } = await supabase.functions.invoke("send-scheduled-test-notification", {
+        body: {
+          userId: user.id,
+          playerId: playerId,
+          title: "Auto-Timer Test",
+          message: "This is an automated test notification from the countdown timer!",
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test notification sent",
+        description: "Check your device for the notification",
+      });
+    } catch (error: any) {
+      console.error("Error sending test notification:", error);
+      toast({
+        title: "Failed to send notification",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [playerId, toast, sendPushNotification]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!isCountdownActive || isPaused) return;
+
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && isCountdownActive) {
+      // Timer hit 0, send notification
+      sendTestNotification();
+      // Generate new random countdown and restart
+      const newCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+      setCountdown(newCountdown);
+    }
+  }, [countdown, isCountdownActive, isPaused, sendTestNotification]);
+
+  // Initialize countdown on mount
+  useEffect(() => {
+    const initialCountdown = Math.floor(Math.random() * 16) + 5; // 5-20 seconds
+    setCountdown(initialCountdown);
+    setIsCountdownActive(true);
+  }, []);
+
+  const resetCountdown = useCallback(() => {
+    const newCountdown = Math.floor(Math.random() * 16) + 5;
+    setCountdown(newCountdown);
+  }, []);
+
+  const togglePause = useCallback(() => {
+    setIsPaused(prev => !prev);
+  }, []);
+
+  const stop = useCallback(() => {
+    setIsCountdownActive(false);
+    setIsPaused(false);
+  }, []);
+
+  const start = useCallback(() => {
+    setIsCountdownActive(true);
+    setIsPaused(false);
+  }, []);
+
+  return {
+    countdown,
+    isCountdownActive,
+    isPaused,
+    resetCountdown,
+    togglePause,
+    stop,
+    start,
+  };
+};
