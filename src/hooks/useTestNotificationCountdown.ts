@@ -18,12 +18,21 @@ export const useTestNotificationCountdown = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
+      // Randomly select one of the alignment reminder messages
+      const messages = [
+        "Pause what you're doing for a moment",
+        "Take a deep breath and recall your intention and emotion",
+        "Notice how you're showing up in the present moment",
+        "Gently adjust your awareness and energy if needed"
+      ];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
       const { data, error } = await supabase.functions.invoke("send-scheduled-test-notification", {
         body: {
           userId: user.id,
           playerId: playerId,
-          title: "Auto-Timer Test",
-          message: "This is an automated test notification from the countdown timer!",
+          title: "Daily Alignment Reminder",
+          message: randomMessage,
         },
       });
 
