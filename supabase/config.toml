@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-scheduled-notifications]
 verify_jwt = false
+
+[functions.send-scheduled-test-notification]
+verify_jwt = false
