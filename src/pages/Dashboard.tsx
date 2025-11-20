@@ -7,13 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { User as UserType, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { getCurrentDate } from "@/lib/timezoneUtils";
 import ReflectionForm from "@/components/ReflectionForm";
 import StarRating from "@/components/StarRating";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const quotes = [
   { text: "The unexamined life is not worth living.", author: "Socrates" },
@@ -50,6 +55,7 @@ export default function Dashboard() {
   const [hideStreakProgress, setHideStreakProgress] = useState(false);
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
+  const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -370,14 +376,36 @@ export default function Dashboard() {
                 </Button>
               </div>
 
-              {/* Reflection Form */}
+              {/* Reflection Dropdown */}
               <div className="mt-4 pt-4 border-t">
-                <ReflectionForm
-                  alignmentId={alignment.id}
-                  onReflectionAdded={handleReflectionAdded}
-                  canAddReflection={canAddReflection[alignment.id] ?? true}
-                  nextReflectionTime={getNextReflectionTime(alignment.id)}
-                />
+                <Collapsible
+                  open={openReflections[alignment.id] ?? false}
+                  onOpenChange={(open) => 
+                    setOpenReflections(prev => ({ ...prev, [alignment.id]: open }))
+                  }
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-between"
+                    >
+                      Add Reflection
+                      <ChevronDown 
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          openReflections[alignment.id] ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4">
+                    <ReflectionForm
+                      alignmentId={alignment.id}
+                      onReflectionAdded={handleReflectionAdded}
+                      canAddReflection={canAddReflection[alignment.id] ?? true}
+                      nextReflectionTime={getNextReflectionTime(alignment.id)}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             </CardContent>
           </Card>
