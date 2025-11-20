@@ -102,11 +102,6 @@ export default function GenerateIntentions() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">Based on your Personal Mission:</p>
-                    <p className="text-sm italic mb-4 p-3 bg-background/50 rounded-md">
-                      "{personalMission}"
-                    </p>
-                    
                     <p className="font-semibold mb-3">Here are 3 intention ideas for you:</p>
                     <ol className="space-y-3 list-decimal list-inside">
                       {intentions.map((intention, index) => (
