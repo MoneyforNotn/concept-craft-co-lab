@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { getCurrentDate } from "@/lib/timezoneUtils";
+import ReflectionForm from "@/components/ReflectionForm";
+import StarRating from "@/components/StarRating";
 
 const quotes = [
   { text: "The unexamined life is not worth living.", author: "Socrates" },
@@ -46,6 +48,8 @@ export default function Dashboard() {
   const [hasNotifications, setHasNotifications] = useState(false);
   const [quote, setQuote] = useState(quotes[0]);
   const [hideStreakProgress, setHideStreakProgress] = useState(false);
+  const [reflections, setReflections] = useState<Record<string, any[]>>({});
+  const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -165,6 +169,36 @@ export default function Dashboard() {
 
       setTodayAlignments(alignmentData || []);
 
+      // Load reflections for today's alignments
+      if (alignmentData && alignmentData.length > 0) {
+        const alignmentIds = alignmentData.map(a => a.id);
+        const { data: reflectionsData } = await supabase
+          .from('alignment_reflections')
+          .select('*')
+          .in('alignment_id', alignmentIds)
+          .order('created_at', { ascending: false });
+
+        const reflectionsByAlignment: Record<string, any[]> = {};
+        const canAddByAlignment: Record<string, boolean> = {};
+
+        alignmentIds.forEach(id => {
+          const alignmentReflections = reflectionsData?.filter(r => r.alignment_id === id) || [];
+          reflectionsByAlignment[id] = alignmentReflections;
+
+          if (alignmentReflections.length === 0) {
+            canAddByAlignment[id] = true;
+          } else {
+            const lastReflection = alignmentReflections[0];
+            const lastReflectionTime = new Date(lastReflection.created_at);
+            const oneHourLater = new Date(lastReflectionTime.getTime() + 60 * 60 * 1000);
+            canAddByAlignment[id] = Date.now() >= oneHourLater.getTime();
+          }
+        });
+
+        setReflections(reflectionsByAlignment);
+        setCanAddReflection(canAddByAlignment);
+      }
+
       const { data: alignments } = await supabase
         .from('daily_alignments')
         .select('date')
@@ -202,6 +236,19 @@ export default function Dashboard() {
       });
       if (user) loadUserData(user.id);
     }
+  };
+
+  const handleReflectionAdded = () => {
+    if (user) loadUserData(user.id);
+  };
+
+  const getNextReflectionTime = (alignmentId: string): Date | undefined => {
+    const alignmentReflections = reflections[alignmentId] || [];
+    if (alignmentReflections.length === 0) return undefined;
+    
+    const lastReflection = alignmentReflections[0];
+    const lastReflectionTime = new Date(lastReflection.created_at);
+    return new Date(lastReflectionTime.getTime() + 60 * 60 * 1000);
   };
 
   const getTierInfo = (days: number) => {
@@ -321,6 +368,16 @@ export default function Dashboard() {
                 >
                   View Details
                 </Button>
+              </div>
+
+              {/* Reflection Form */}
+              <div className="mt-4 pt-4 border-t">
+                <ReflectionForm
+                  alignmentId={alignment.id}
+                  onReflectionAdded={handleReflectionAdded}
+                  canAddReflection={canAddReflection[alignment.id] ?? true}
+                  nextReflectionTime={getNextReflectionTime(alignment.id)}
+                />
               </div>
             </CardContent>
           </Card>

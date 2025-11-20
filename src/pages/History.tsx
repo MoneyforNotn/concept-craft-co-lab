@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Bookmark, Calendar, Filter } from "lucide-react";
 import { format } from "date-fns";
+import StarRating from "@/components/StarRating";
 
 export default function History() {
   const [alignments, setAlignments] = useState<any[]>([]);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +37,23 @@ export default function History() {
 
       if (error) throw error;
       setAlignments(data || []);
+
+      // Load reflections for all alignments
+      if (data && data.length > 0) {
+        const alignmentIds = data.map(a => a.id);
+        const { data: reflectionsData } = await supabase
+          .from('alignment_reflections')
+          .select('*')
+          .in('alignment_id', alignmentIds)
+          .order('created_at', { ascending: false });
+
+        const reflectionsByAlignment: Record<string, any[]> = {};
+        alignmentIds.forEach(id => {
+          reflectionsByAlignment[id] = reflectionsData?.filter(r => r.alignment_id === id) || [];
+        });
+
+        setReflections(reflectionsByAlignment);
+      }
     } catch (error) {
       console.error('Error loading alignments:', error);
     } finally {
@@ -54,6 +73,14 @@ export default function History() {
     } catch (error) {
       console.error('Error toggling bookmark:', error);
     }
+  };
+
+  const getAverageRating = (alignmentId: string): number => {
+    const alignmentReflections = reflections[alignmentId] || [];
+    if (alignmentReflections.length === 0) return 0;
+    
+    const sum = alignmentReflections.reduce((acc, r) => acc + r.star_rating, 0);
+    return sum / alignmentReflections.length;
   };
 
   return (
@@ -154,6 +181,19 @@ export default function History() {
                       <span className="font-medium">{alignment.emotion}</span>
                     </div>
                   </div>
+
+                  {/* Average Star Rating */}
+                  {reflections[alignment.id]?.length > 0 && (
+                    <div className="mt-3 pt-3 border-t flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Reflection:</span>
+                      <StarRating rating={Math.round(getAverageRating(alignment.id))} readonly size={16} />
+                      {reflections[alignment.id].length > 1 && (
+                        <span className="text-xs text-muted-foreground">
+                          (avg of {reflections[alignment.id].length})
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
