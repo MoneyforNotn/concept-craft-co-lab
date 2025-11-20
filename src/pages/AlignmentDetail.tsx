@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X, Trash2 } from "lucide-react";
+import ReflectionForm from "@/components/ReflectionForm";
+import StarRating from "@/components/StarRating";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
@@ -31,6 +33,8 @@ export default function AlignmentDetail() {
   const [editedIntention, setEditedIntention] = useState("");
   const [editedEmotion, setEditedEmotion] = useState("");
   const [editedDate, setEditedDate] = useState("");
+  const [reflections, setReflections] = useState<any[]>([]);
+  const [canAddReflection, setCanAddReflection] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -52,6 +56,25 @@ export default function AlignmentDetail() {
       setEditedIntention(data.intention);
       setEditedEmotion(data.emotion);
       setEditedDate(data.date);
+
+      // Load reflections for this alignment
+      const { data: reflectionsData } = await supabase
+        .from('alignment_reflections')
+        .select('*')
+        .eq('alignment_id', id)
+        .order('created_at', { ascending: false });
+
+      setReflections(reflectionsData || []);
+
+      // Check if user can add a new reflection (1 hour cooldown)
+      if (reflectionsData && reflectionsData.length > 0) {
+        const lastReflection = reflectionsData[0];
+        const lastReflectionTime = new Date(lastReflection.created_at);
+        const oneHourLater = new Date(lastReflectionTime.getTime() + 60 * 60 * 1000);
+        setCanAddReflection(Date.now() >= oneHourLater.getTime());
+      } else {
+        setCanAddReflection(true);
+      }
 
       // Check today's alignment count
       const { data: { user } } = await supabase.auth.getUser();
@@ -373,8 +396,40 @@ export default function AlignmentDetail() {
                 Add Photo
               </Button>
             </div>
+
+            {/* Display past reflections */}
+            {reflections.length > 0 && (
+              <div className="mt-6 pt-6 border-t space-y-4">
+                <h3 className="font-medium">Past Reflections</h3>
+                {reflections.map((reflection, index) => (
+                  <div key={reflection.id} className="bg-muted/30 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <StarRating rating={reflection.star_rating} readonly size={20} />
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(reflection.created_at), 'MMM d, yyyy h:mm a')}
+                      </span>
+                    </div>
+                    {reflection.notes && (
+                      <p className="text-sm text-muted-foreground">{reflection.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Reflection Form */}
+        <ReflectionForm
+          alignmentId={id!}
+          onReflectionAdded={loadAlignment}
+          canAddReflection={canAddReflection}
+          nextReflectionTime={
+            reflections.length > 0
+              ? new Date(new Date(reflections[0].created_at).getTime() + 60 * 60 * 1000)
+              : undefined
+          }
+        />
 
         <Card className="border-destructive/50">
           <CardContent className="pt-6">

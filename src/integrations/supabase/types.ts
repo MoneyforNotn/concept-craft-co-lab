@@ -43,6 +43,41 @@ export type Database = {
           },
         ]
       }
+      alignment_reflections: {
+        Row: {
+          alignment_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          star_rating: number
+          user_id: string
+        }
+        Insert: {
+          alignment_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          star_rating: number
+          user_id: string
+        }
+        Update: {
+          alignment_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          star_rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alignment_reflections_alignment_id_fkey"
+            columns: ["alignment_id"]
+            isOneToOne: false
+            referencedRelation: "daily_alignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_alignments: {
         Row: {
           created_at: string | null
