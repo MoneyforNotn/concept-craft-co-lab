@@ -303,14 +303,14 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
         {profile.show_quotes !== false && (
-          <div className="pt-20 pb-2 text-center">
+          <div className="pt-12 pb-2 text-center">
             <p className="text-sm italic text-muted-foreground">
               "{quote.text}" — {quote.author}
             </p>
           </div>
         )}
         
-        <div className={`flex justify-between items-center ${profile.show_quotes === false ? 'pt-6' : ''}`}>
+        <div className={`flex justify-between items-center ${profile.show_quotes === false ? 'pt-4' : ''}`}>
           <h1 
             className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/guide")}
