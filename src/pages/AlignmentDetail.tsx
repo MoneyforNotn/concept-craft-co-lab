@@ -286,11 +286,11 @@ export default function AlignmentDetail() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-2xl mx-auto py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 pt-4">
           <Button 
             variant="ghost" 
             onClick={() => navigate("/history")}
-            className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+            className={`fixed top-10 left-4 z-50 transition-all duration-300 ${
               showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
             }`}
           >

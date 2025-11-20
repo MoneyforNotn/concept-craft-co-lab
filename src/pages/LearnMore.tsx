@@ -29,12 +29,12 @@ export default function LearnMore() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
-        <div className="flex items-center gap-4 pt-6">
+        <div className="flex items-center gap-4 pt-10">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+            className={`fixed top-10 left-4 z-50 transition-all duration-300 ${
               showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
             }`}
           >
