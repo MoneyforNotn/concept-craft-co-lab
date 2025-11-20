@@ -522,31 +522,6 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
-              <Button 
-                onClick={handleSendTestNotification}
-                disabled={sendingTest}
-                className="w-full"
-              >
-                {sendingTest ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Bell className="mr-2 h-4 w-4" />
-                    Send Test Notification Now
-                  </>
-                )}
-              </Button>
-
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Note: Test notifications are sent immediately to your device
-              </p>
-
-              <p className="text-xs text-muted-foreground">
-                Player ID: {playerId}
-              </p>
             </CardContent>
           </Card>
         )}
