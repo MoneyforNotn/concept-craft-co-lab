@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [streakCount, setStreakCount] = useState(0);
   const [hasNotifications, setHasNotifications] = useState(false);
   const [quote, setQuote] = useState(quotes[0]);
+  const [hideStreakProgress, setHideStreakProgress] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -146,6 +147,7 @@ export default function Dashboard() {
         .single();
 
       setProfile(profileData);
+      setHideStreakProgress(profileData?.hide_streak_progress ?? false);
 
       if (profileData && !profileData.onboarding_completed) {
         navigate("/onboarding");
@@ -341,46 +343,50 @@ export default function Dashboard() {
           </Card>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{streakCount}</div>
-              <p className="text-xs text-muted-foreground">days</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Next Milestone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {getNextMilestone(streakCount)}
-              </div>
-              <p className="text-xs text-muted-foreground">days</p>
-            </CardContent>
-          </Card>
-        </div>
+        {!hideStreakProgress && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary">{streakCount}</div>
+                  <p className="text-xs text-muted-foreground">days</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Next Milestone</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-primary">
+                    {getNextMilestone(streakCount)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">days</p>
+                </CardContent>
+              </Card>
+            </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Tier Progress</CardTitle>
-              <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} text-white`}>
-                {getTierInfo(streakCount).tier}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Progress value={calculateProgress()} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{getPreviousMilestone(streakCount)} days</span>
-              <span>{streakCount} / {getNextMilestone(streakCount)} days</span>
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">Tier Progress</CardTitle>
+                  <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} text-white`}>
+                    {getTierInfo(streakCount).tier}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Progress value={calculateProgress()} className="h-2" />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{getPreviousMilestone(streakCount)} days</span>
+                  <span>{streakCount} / {getNextMilestone(streakCount)} days</span>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
         <div className="grid grid-cols-3 gap-4 pb-3">
           <Button
@@ -426,6 +432,12 @@ export default function Dashboard() {
           <BookOpen className="mr-2 h-4 w-4" />
           Learn More
         </Button>
+
+        <div className="pt-4 pb-8 text-center">
+          <p className="text-sm italic text-muted-foreground">
+            "Wholeness is not something you create, it is something you notice. It's the quiet realization that nothing is actually missing, now."
+          </p>
+        </div>
       </div>
     </div>
   );

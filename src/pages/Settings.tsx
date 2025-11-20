@@ -42,6 +42,7 @@ export default function Settings() {
   const [scheduledTimes, setScheduledTimes] = useState<string[]>(["09:00", "13:00", "18:00"]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showQuotes, setShowQuotes] = useState(true);
+  const [hideStreakProgress, setHideStreakProgress] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [scheduleTestNotification, setScheduleTestNotification] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState("");
@@ -84,7 +85,7 @@ export default function Settings() {
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('personal_mission, timezone, show_quotes')
+        .select('personal_mission, timezone, show_quotes, hide_streak_progress')
         .eq('id', user.id)
         .single();
 
@@ -92,6 +93,7 @@ export default function Settings() {
         setPersonalMission(profileData.personal_mission || "");
         setTimezone(profileData.timezone || "local");
         setShowQuotes(profileData.show_quotes ?? true);
+        setHideStreakProgress(profileData.hide_streak_progress ?? false);
       }
 
       // Load notification settings
@@ -587,6 +589,44 @@ export default function Settings() {
                       description: error.message,
                     });
                     setShowQuotes(!checked);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="hide-streak">Hide Streak & Milestone Progress</Label>
+                <p className="text-sm text-muted-foreground">
+                  Hide current streak, milestone cards, and tier progress from Dashboard
+                </p>
+              </div>
+              <Switch
+                id="hide-streak"
+                checked={hideStreakProgress}
+                onCheckedChange={async (checked) => {
+                  setHideStreakProgress(checked);
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const { error } = await supabase
+                      .from('profiles')
+                      .update({ hide_streak_progress: checked })
+                      .eq('id', user.id);
+
+                    if (error) throw error;
+
+                    toast({
+                      title: checked ? "Streak progress hidden" : "Streak progress shown",
+                    });
+                  } catch (error: any) {
+                    toast({
+                      variant: "destructive",
+                      title: "Error updating preference",
+                      description: error.message,
+                    });
+                    setHideStreakProgress(!checked);
                   }
                 }}
               />

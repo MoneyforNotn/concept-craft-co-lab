@@ -236,6 +236,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          hide_streak_progress: boolean | null
           id: string
           onboarding_completed: boolean | null
           onesignal_player_id: string | null
@@ -246,6 +247,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          hide_streak_progress?: boolean | null
           id: string
           onboarding_completed?: boolean | null
           onesignal_player_id?: string | null
@@ -256,6 +258,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          hide_streak_progress?: boolean | null
           id?: string
           onboarding_completed?: boolean | null
           onesignal_player_id?: string | null
