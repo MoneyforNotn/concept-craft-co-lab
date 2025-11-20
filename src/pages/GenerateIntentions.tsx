@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -11,12 +12,13 @@ export default function GenerateIntentions() {
   const [intentions, setIntentions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [personalMission, setPersonalMission] = useState("");
+  const [userFeedback, setUserFeedback] = useState("");
 
   useEffect(() => {
     fetchPersonalMissionAndGenerateIntentions();
   }, []);
 
-  const fetchPersonalMissionAndGenerateIntentions = async () => {
+  const fetchPersonalMissionAndGenerateIntentions = async (feedback?: string) => {
     try {
       setIsLoading(true);
       
@@ -46,7 +48,10 @@ export default function GenerateIntentions() {
 
       // Generate intentions
       const { data, error } = await supabase.functions.invoke('generate-intentions', {
-        body: { personalMission: profile.personal_mission }
+        body: { 
+          personalMission: profile.personal_mission,
+          userFeedback: feedback || null
+        }
       });
 
       if (error) throw error;
@@ -61,6 +66,13 @@ export default function GenerateIntentions() {
       toast.error("Failed to generate intentions. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSendFeedback = () => {
+    if (userFeedback.trim()) {
+      fetchPersonalMissionAndGenerateIntentions(userFeedback);
+      setUserFeedback("");
     }
   };
 
@@ -112,17 +124,26 @@ export default function GenerateIntentions() {
                     </ol>
 
                     <div className="mt-6 pt-4 border-t border-border">
-                      <p className="text-sm text-muted-foreground">
-                        How would you like these intention ideas to be changed? You can ask me to make them more specific, broader, focused on different aspects, or adjusted in any way you prefer.
+                      <p className="text-sm text-muted-foreground mb-3">
+                        How would you like these intention ideas to be changed?
                       </p>
+                      <div className="flex gap-2">
+                        <Input
+                          value={userFeedback}
+                          onChange={(e) => setUserFeedback(e.target.value)}
+                          placeholder="Type your feedback here..."
+                          onKeyDown={(e) => e.key === "Enter" && handleSendFeedback()}
+                          className="flex-1"
+                        />
+                        <Button 
+                          onClick={handleSendFeedback}
+                          size="icon"
+                          disabled={!userFeedback.trim()}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-
-                    <Button 
-                      onClick={fetchPersonalMissionAndGenerateIntentions}
-                      className="mt-4 w-full"
-                    >
-                      Generate New Intentions
-                    </Button>
                   </div>
                 )}
               </CardContent>

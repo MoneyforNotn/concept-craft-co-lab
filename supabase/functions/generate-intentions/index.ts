@@ -15,9 +15,10 @@ serve(async (req) => {
   }
 
   try {
-    const { personalMission } = await req.json();
+    const { personalMission, userFeedback } = await req.json();
 
     console.log('Generating intentions for personal mission:', personalMission);
+    console.log('User feedback:', userFeedback);
 
     const systemPrompt = `You are an AI assistant that generates daily intentions based on a user's personal mission. 
 Generate exactly 3 creative, actionable intentions that align with the user's broader values and goals.
@@ -42,9 +43,14 @@ CRITICAL: Return ONLY a valid JSON array with exactly 3 strings. Example format:
 
 Do not include any other text, explanations, or formatting. Just the JSON array.`;
 
-    const userPrompt = `Personal Mission: "${personalMission}"
+    let userPrompt = `Personal Mission: "${personalMission}"
 
 Generate 3 creative intentions that align with this personal mission.`;
+
+    if (userFeedback) {
+      userPrompt += `\n\nUser's feedback on previous intentions: "${userFeedback}"
+Please adjust the new intentions based on this feedback while still aligning with the personal mission.`;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
