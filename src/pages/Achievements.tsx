@@ -294,7 +294,7 @@ export default function Achievements() {
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className={`mb-6 fixed top-6 left-6 z-50 bg-background/80 backdrop-blur-sm shadow-md transition-all duration-300 ${
+          className={`mb-6 fixed top-6 left-6 z-50 transition-all duration-300 ${
             showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
           }`}
         >
