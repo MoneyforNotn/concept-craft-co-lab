@@ -37,7 +37,10 @@ Intentions should be:
 - Actionable in daily life
 - Aligned with the personal mission provided
 
-Format your response as a JSON array of 3 intention strings only, nothing else.`;
+CRITICAL: Return ONLY a valid JSON array with exactly 3 strings. Example format:
+["intention 1", "intention 2", "intention 3"]
+
+Do not include any other text, explanations, or formatting. Just the JSON array.`;
 
     const userPrompt = `Personal Mission: "${personalMission}"
 
@@ -50,13 +53,13 @@ Generate 3 creative intentions that align with this personal mission.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_completion_tokens: 300,
-        response_format: { type: "json_object" }
+        temperature: 0.8,
+        max_tokens: 500
       }),
     });
 
@@ -76,14 +79,23 @@ Generate 3 creative intentions that align with this personal mission.`;
     console.log('OpenAI response:', data);
     
     const generatedText = data.choices[0].message.content;
+    console.log('Generated text:', generatedText);
     let intentions;
     
     try {
-      const parsed = JSON.parse(generatedText);
-      intentions = parsed.intentions || parsed;
+      const parsed = JSON.parse(generatedText.trim());
+      // If it's already an array, use it; otherwise look for intentions property
+      intentions = Array.isArray(parsed) ? parsed : (parsed.intentions || [generatedText]);
     } catch (e) {
-      console.error('Failed to parse intentions:', e);
-      intentions = [generatedText];
+      console.error('Failed to parse intentions:', e, 'Raw text:', generatedText);
+      // Try to extract intentions from text if JSON parsing fails
+      intentions = ["Try again - the AI response couldn't be parsed"];
+    }
+    
+    // Validate we have 3 intentions
+    if (!Array.isArray(intentions) || intentions.length === 0) {
+      console.error('Invalid intentions array:', intentions);
+      intentions = ["Please try generating again"];
     }
 
     return new Response(JSON.stringify({ intentions }), {
