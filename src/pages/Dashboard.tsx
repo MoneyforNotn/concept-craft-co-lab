@@ -19,6 +19,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useTestNotification } from "@/contexts/TestNotificationContext";
 
 const quotes = [
   { text: "The unexamined life is not worth living.", author: "Socrates" },
@@ -56,10 +57,15 @@ export default function Dashboard() {
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
   const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
+  const [openAboutNotifications, setOpenAboutNotifications] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
   const { playerId } = useDespiaPush();
+  const { timer1, timer2 } = useTestNotification();
+  
+  // Bell icon should be active if either timer is active and not paused
+  const isNotificationActive = (timer1.isCountdownActive && !timer1.isPaused) || (timer2.isCountdownActive && !timer2.isPaused);
 
   useEffect(() => {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -313,15 +319,15 @@ export default function Dashboard() {
           </h1>
           <div className="flex items-center gap-2">
             <Badge 
-              variant={hasNotifications ? "secondary" : "outline"}
+              variant={isNotificationActive ? "secondary" : "outline"}
               className={`gap-1 cursor-pointer transition-colors ${
-                hasNotifications 
+                isNotificationActive 
                   ? 'hover:bg-secondary/80' 
                   : 'text-muted-foreground hover:bg-muted'
               }`}
               onClick={() => navigate("/settings")}
             >
-              {hasNotifications ? (
+              {isNotificationActive ? (
                 <>
                   <Bell className="h-3 w-3" />
                   Active
