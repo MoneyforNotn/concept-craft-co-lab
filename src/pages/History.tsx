@@ -13,11 +13,30 @@ export default function History() {
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
+  const [showBackButton, setShowBackButton] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadAlignments();
   }, [showBookmarkedOnly]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setShowBackButton(true);
+      } else {
+        setShowBackButton(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const loadAlignments = async () => {
     try {
@@ -90,6 +109,9 @@ export default function History() {
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
+            className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+              showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
+            }`}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back

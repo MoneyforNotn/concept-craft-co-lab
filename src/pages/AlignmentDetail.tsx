@@ -35,12 +35,31 @@ export default function AlignmentDetail() {
   const [editedDate, setEditedDate] = useState("");
   const [reflections, setReflections] = useState<any[]>([]);
   const [canAddReflection, setCanAddReflection] = useState(true);
+  const [showBackButton, setShowBackButton] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     loadAlignment();
   }, [id]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setShowBackButton(true);
+      } else {
+        setShowBackButton(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const loadAlignment = async () => {
     try {
@@ -268,7 +287,13 @@ export default function AlignmentDetail() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-2xl mx-auto py-8">
         <div className="flex justify-between items-center mb-6">
-          <Button variant="ghost" onClick={() => navigate("/history")}>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/history")}
+            className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+              showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
+            }`}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
