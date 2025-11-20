@@ -303,7 +303,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
       <div className="container max-w-4xl mx-auto p-4 space-y-6">
         {profile.show_quotes !== false && (
-          <div className="pt-12 pb-1 text-center">
+          <div className="pt-6 pb-0 text-center">
             <p className="text-sm italic text-muted-foreground">
               "{quote.text}" — {quote.author}
             </p>
