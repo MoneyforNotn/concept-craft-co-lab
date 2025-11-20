@@ -291,16 +291,18 @@ export default function Achievements() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-4xl mx-auto py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className={`mb-6 fixed top-6 left-6 z-50 transition-all duration-300 ${
-            showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
-          }`}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <div className="pt-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className={`mb-6 fixed top-10 left-4 z-50 transition-all duration-300 ${
+              showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
+            }`}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+        </div>
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Your Achievements</h1>
