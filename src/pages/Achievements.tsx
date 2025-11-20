@@ -24,6 +24,8 @@ export default function Achievements() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [totalDays, setTotalDays] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showBackButton, setShowBackButton] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -32,6 +34,25 @@ export default function Achievements() {
   useEffect(() => {
     loadAchievements();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show back button when scrolling up or at the top
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setShowBackButton(true);
+      } else {
+        // Hide when scrolling down
+        setShowBackButton(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   useEffect(() => {
     // Trigger confetti for newly unlocked achievements (achieved in last 24 hours)
@@ -273,7 +294,9 @@ export default function Achievements() {
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className="mb-6"
+          className={`mb-6 fixed top-6 left-6 z-50 bg-background/80 backdrop-blur-sm shadow-md transition-all duration-300 ${
+            showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
+          }`}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
