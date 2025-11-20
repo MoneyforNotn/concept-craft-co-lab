@@ -526,7 +526,6 @@ export default function Settings() {
           </Card>
         )}
 
-
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>About Notifications</CardTitle>
@@ -717,6 +716,16 @@ export default function Settings() {
           </CardContent>
         </Card>
         </div>
+
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className={`fixed top-6 left-6 z-50 transition-all duration-300 ${
+            showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
+          }`}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

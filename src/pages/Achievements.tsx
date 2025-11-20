@@ -290,7 +290,7 @@ export default function Achievements() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
-      <div className="container max-w-4xl mx-auto py-8">
+      <div className="container max-w-4xl mx-auto pt-12 pb-8">
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
