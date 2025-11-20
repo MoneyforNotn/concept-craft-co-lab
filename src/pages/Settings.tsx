@@ -557,9 +557,6 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="show-quotes">Inspirational Quotes</Label>
-                <p className="text-sm text-muted-foreground">
-                  Show quotes at the top of the Dashboard
-                </p>
               </div>
               <Switch
                 id="show-quotes"
@@ -595,9 +592,6 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="hide-streak">Hide Streak & Milestone Progress</Label>
-                <p className="text-sm text-muted-foreground">
-                  Hide current streak, milestone cards, and tier progress from Dashboard
-                </p>
               </div>
               <Switch
                 id="hide-streak"
