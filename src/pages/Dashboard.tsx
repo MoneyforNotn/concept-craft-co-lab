@@ -358,7 +358,7 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="bg-gradient-to-br from-purple-500/15 via-background via-50% to-purple-600/15 border-purple-500/20 cursor-pointer hover:opacity-80 transition-opacity"
+          className="bg-gradient-to-br from-purple-500/15 via-background via-70% to-purple-600/15 border-purple-500/20 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate("/generate-intentions")}
         >
           <CardHeader>
