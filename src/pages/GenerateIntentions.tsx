@@ -85,7 +85,7 @@ export default function GenerateIntentions() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
