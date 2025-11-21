@@ -131,20 +131,23 @@ export default function PersonalMission() {
           <h1 className="text-3xl font-bold">Your Personal Mission</h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-5xl mx-auto">
           <div className="space-y-4">
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-center">
               Edit your personal mission or retake the questions to generate a new one
             </p>
             <div className="space-y-2">
-              <Label htmlFor="mission">Personal Mission</Label>
-              <Textarea
-                id="mission"
-                value={personalMission}
-                onChange={(e) => setPersonalMission(e.target.value)}
-                placeholder="Your personal mission..."
-                className="min-h-[200px] text-base"
-              />
+              <Label htmlFor="mission" className="sr-only">Personal Mission</Label>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background pointer-events-none z-10 rounded-md"></div>
+                <Textarea
+                  id="mission"
+                  value={personalMission}
+                  onChange={(e) => setPersonalMission(e.target.value)}
+                  placeholder="Your personal mission..."
+                  className="min-h-[300px] text-lg leading-relaxed border-none bg-background/60 backdrop-blur-sm shadow-none font-serif px-12 py-8"
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <Button 
