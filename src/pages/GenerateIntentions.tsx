@@ -13,6 +13,7 @@ export default function GenerateIntentions() {
   const [isLoading, setIsLoading] = useState(true);
   const [personalMission, setPersonalMission] = useState("");
   const [userFeedback, setUserFeedback] = useState("");
+  const [lastFeedback, setLastFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPersonalMissionAndGenerateIntentions();
@@ -71,6 +72,7 @@ export default function GenerateIntentions() {
 
   const handleSendFeedback = () => {
     if (userFeedback.trim()) {
+      setLastFeedback(userFeedback);
       fetchPersonalMissionAndGenerateIntentions(userFeedback);
       setUserFeedback("");
     }
@@ -78,8 +80,8 @@ export default function GenerateIntentions() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
-      <div className="container max-w-4xl mx-auto p-4">
-        <div className="mb-6 flex items-center gap-4">
+      <div className="container max-w-4xl mx-auto p-4 pt-16">
+        <div className="mb-8 flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -87,7 +89,7 @@ export default function GenerateIntentions() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">Generate Intentions AI</h1>
+          <h1 className="text-3xl font-bold">Generate Intentions with AI</h1>
         </div>
 
         <div className="space-y-6">
@@ -95,9 +97,8 @@ export default function GenerateIntentions() {
           <div className="flex justify-end">
             <Card className="max-w-[80%] bg-primary/10 border-primary/20">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">Your Request:</p>
                 <p className="text-base">
-                  Generate creative Intentions based on my Personal Mission so that my daily alignments can be consistent with my broader values and goals.
+                  Create daily intentions tailored for me
                 </p>
               </CardContent>
             </Card>
@@ -114,7 +115,14 @@ export default function GenerateIntentions() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="font-semibold mb-3">Here are 3 intention ideas for you:</p>
+                    <div>
+                      <p className="font-semibold mb-1">Here are 3 intention ideas for you:</p>
+                      {lastFeedback && (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Based on your request: "{lastFeedback}"
+                        </p>
+                      )}
+                    </div>
                     <ol className="space-y-3 list-decimal list-inside">
                       {intentions.map((intention, index) => (
                         <li key={index} className="text-base leading-relaxed pl-2">
@@ -125,7 +133,7 @@ export default function GenerateIntentions() {
 
                     <div className="mt-6 pt-4 border-t border-border">
                       <p className="text-sm text-muted-foreground mb-3">
-                        How would you like these intention ideas to be changed?
+                        How shall we improve these?
                       </p>
                       <div className="flex gap-2">
                         <Input
