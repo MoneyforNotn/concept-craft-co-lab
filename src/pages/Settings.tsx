@@ -5,21 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { useTestNotification } from "@/contexts/TestNotificationContext";
-import { ArrowLeft, Loader2, Bell, BellOff, Pencil, RefreshCw, Clock, Moon, Sun, Play, Pause } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Clock, Moon, Sun, Play, Pause } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
-
-const missionSchema = z.object({
-  mission: z.string().trim().max(5000, "Personal mission must be less than 5000 characters"),
-});
 
 const timezoneSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
@@ -32,9 +27,7 @@ const notificationSchema = z.object({
 
 export default function Settings() {
   const [loading, setLoading] = useState(false);
-  const [savingMission, setSavingMission] = useState(false);
   const [savingTimezone, setSavingTimezone] = useState(false);
-  const [personalMission, setPersonalMission] = useState("");
   const [timezone, setTimezone] = useState("local");
   const [currentDateTime, setCurrentDateTime] = useState("");
   const [frequencyCount, setFrequencyCount] = useState(3);
@@ -87,12 +80,11 @@ export default function Settings() {
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('personal_mission, timezone, show_quotes, hide_streak_progress')
+        .select('timezone, show_quotes, hide_streak_progress')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
-        setPersonalMission(profileData.personal_mission || "");
         setTimezone(profileData.timezone || "local");
         setShowQuotes(profileData.show_quotes ?? true);
         setHideStreakProgress(profileData.hide_streak_progress ?? false);
@@ -233,70 +225,6 @@ export default function Settings() {
     }
   };
 
-  const handleSaveMission = async () => {
-    setSavingMission(true);
-    try {
-      // Validate personal mission
-      const validation = missionSchema.safeParse({ mission: personalMission });
-      if (!validation.success) {
-        throw new Error(validation.error.errors[0].message);
-      }
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          personal_mission: validation.data.mission,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Personal mission updated",
-        description: "Your personal mission has been saved.",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error updating mission",
-        description: error.message,
-      });
-    } finally {
-      setSavingMission(false);
-    }
-  };
-
-  const handleRetakeOnboarding = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Mark onboarding as incomplete to allow retaking
-      const { error } = await supabase
-        .from('profiles')
-        .update({ onboarding_completed: false })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Onboarding reset",
-        description: "Taking you back to the onboarding process.",
-      });
-
-      navigate("/onboarding");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error resetting onboarding",
-        description: error.message,
-      });
-    }
-  };
-
   const handleSaveTimezone = async () => {
     setSavingTimezone(true);
     try {
@@ -412,52 +340,13 @@ export default function Settings() {
         </div>
 
         <div className="space-y-6">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate("/personal-mission")}
+          >
             <CardHeader>
               <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
-              <CardDescription>
-                Edit your personal mission or retake the questions to generate a new one
-              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mission">Personal Mission</Label>
-                <Textarea
-                  id="mission"
-                  value={personalMission}
-                  onChange={(e) => setPersonalMission(e.target.value)}
-                  placeholder="Your personal mission..."
-                  className="min-h-32"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={handleSaveMission} 
-                  disabled={savingMission}
-                  className="w-full"
-                >
-                  {savingMission ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleRetakeOnboarding}
-                  className="w-full"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retake Questions
-                </Button>
-              </div>
-            </CardContent>
           </Card>
 
 

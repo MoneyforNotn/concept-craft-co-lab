@@ -347,7 +347,7 @@ export default function Dashboard() {
 
         <Card 
           className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20 cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => navigate("/settings")}
+          onClick={() => navigate("/personal-mission")}
         >
           <CardHeader>
             <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
