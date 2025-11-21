@@ -103,7 +103,7 @@ export default function History() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/15 via-blue-500/10 via-70% to-secondary/20 p-4">
       <div className="container max-w-4xl mx-auto py-8">
         <div className="flex items-center justify-between mb-6 pt-4">
           <Button
