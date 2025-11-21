@@ -118,7 +118,7 @@ export default function PersonalMission() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/15 via-blue-500/10 via-70% to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-500/25 via-primary/15 via-blue-500/10 via-70% to-secondary/20">
       <div className="container max-w-6xl mx-auto p-4 pt-16">
         <div className="mb-8 flex items-center gap-4">
           <Button
