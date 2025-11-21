@@ -284,7 +284,7 @@ export default function AlignmentDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500/20 via-primary/15 via-30% to-blue-500/10 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
       <div className="container max-w-2xl mx-auto py-8">
         <div className="flex justify-between items-center mb-6 pt-4">
           <Button 

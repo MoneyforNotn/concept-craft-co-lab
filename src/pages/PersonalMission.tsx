@@ -118,8 +118,8 @@ export default function PersonalMission() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500/20 via-primary/15 via-30% to-blue-500/10">
-      <div className="container max-w-7xl mx-auto p-4 pt-16">
+    <div className="min-h-screen bg-gradient-to-br from-primary/15 via-blue-500/10 via-70% to-secondary/20">
+      <div className="container max-w-6xl mx-auto p-4 pt-16">
         <div className="mb-8 flex items-center gap-4">
           <Button
             variant="ghost"
@@ -143,8 +143,7 @@ export default function PersonalMission() {
                 value={personalMission}
                 onChange={(e) => setPersonalMission(e.target.value)}
                 placeholder="Your personal mission..."
-                className="min-h-[200px] text-lg font-serif border-transparent bg-background/40 backdrop-blur-sm shadow-lg [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_5%,black_95%,transparent_100%)] [mask-composite:intersect]"
-                style={{ fontFamily: "'Crimson Text', serif" }}
+                className="min-h-[200px] text-base"
               />
             </div>
             <div className="flex flex-col gap-2">
