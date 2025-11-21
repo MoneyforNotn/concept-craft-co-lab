@@ -143,7 +143,9 @@ export default function PersonalMission() {
                 value={personalMission}
                 onChange={(e) => setPersonalMission(e.target.value)}
                 placeholder="Your personal mission..."
-                className="min-h-[300px] text-lg leading-relaxed bg-white border border-border/30 rounded-2xl shadow-sm px-10 py-8 focus-visible:ring-1 focus-visible:ring-ring/50"
+                className="min-h-[400px] max-h-none text-lg leading-relaxed bg-white border border-border/30 rounded-3xl shadow-sm px-12 py-10 focus-visible:ring-1 focus-visible:ring-ring/50 resize-none overflow-y-hidden font-['Inter',sans-serif]"
+                style={{ height: 'auto', minHeight: '400px' }}
+                rows={15}
               />
             </div>
             <div className="flex flex-col gap-2">
