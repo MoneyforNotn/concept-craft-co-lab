@@ -375,14 +375,9 @@ export default function Dashboard() {
                   clipRule="evenodd"
                 />
               </svg>
-              Generate Intentions AI
+              Generate Intentions with AI
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Get AI-powered intention suggestions based on your personal mission
-            </p>
-          </CardContent>
         </Card>
 
         {todayAlignments.length > 0 && todayAlignments.map((alignment, index) => (
