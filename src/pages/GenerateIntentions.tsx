@@ -79,7 +79,7 @@ export default function GenerateIntentions() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500/20 via-purple-400/10 to-purple-600/20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-500/15 via-background via-50% to-purple-600/15">
       <div className="container max-w-4xl mx-auto p-4 pt-16">
         <div className="mb-8 flex items-center gap-4">
           <Button
@@ -98,7 +98,7 @@ export default function GenerateIntentions() {
             <Card className="max-w-[80%] bg-primary/10 border-primary/20">
               <CardContent className="p-4">
                 <p className="text-base">
-                  Create Daily Alignments tailored for My Personal Mission
+                  Create Daily Alignments tailored to My Personal Mission
                 </p>
               </CardContent>
             </Card>
