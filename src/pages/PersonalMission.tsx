@@ -119,57 +119,43 @@ export default function PersonalMission() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500/20 via-purple-400/10 via-50% to-background">
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-12 flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
+      <div className="container max-w-4xl mx-auto p-4 pt-16">
+        <div className="mb-8 flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
-            className="hover:bg-purple-500/10"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
-            Your Personal Mission
-          </h1>
+          <h1 className="text-3xl font-bold">Your Personal Mission</h1>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Large Textarea - Takes 2/3 of space */}
-          <div className="lg:col-span-2">
-            <Card className="h-full bg-gradient-to-br from-purple-500/5 to-background border-purple-500/20 shadow-lg shadow-purple-500/5">
-              <CardHeader>
-                <CardTitle className="text-2xl text-purple-600">Your Personal Mission</CardTitle>
-                <CardDescription>
-                  This is your guiding light - the core purpose that drives your daily alignments
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+              <CardDescription>
+                Edit your personal mission or retake the questions to generate a new one
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="mission">Personal Mission</Label>
                 <Textarea
                   id="mission"
                   value={personalMission}
                   onChange={(e) => setPersonalMission(e.target.value)}
                   placeholder="Your personal mission..."
-                  className="min-h-[500px] text-lg leading-relaxed resize-none bg-background/50 border-purple-500/20 focus:border-purple-500/40 focus:ring-purple-500/20"
+                  className="min-h-32"
                 />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Actions Panel - Takes 1/3 of space */}
-          <div className="lg:col-span-1 space-y-4">
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20 shadow-lg shadow-purple-500/5">
-              <CardHeader>
-                <CardTitle className="text-lg">Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+              </div>
+              <div className="flex flex-col gap-2">
                 <Button 
                   onClick={handleSaveMission} 
                   disabled={savingMission}
-                  className="w-full bg-purple-600 hover:bg-purple-700 transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30"
+                  className="w-full"
                 >
                   {savingMission ? (
                     <>
@@ -186,26 +172,14 @@ export default function PersonalMission() {
                 <Button 
                   variant="outline"
                   onClick={handleRetakeOnboarding}
-                  className="w-full border-purple-500/30 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all duration-300"
+                  className="w-full"
                 >
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Retake Questions
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-500/5 to-background border-purple-500/20">
-              <CardHeader>
-                <CardTitle className="text-lg">Tips</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>• Be authentic and specific</p>
-                <p>• Focus on your core values</p>
-                <p>• Think long-term impact</p>
-                <p>• Make it actionable</p>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
