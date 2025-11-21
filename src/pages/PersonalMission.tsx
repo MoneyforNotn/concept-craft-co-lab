@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -119,8 +118,8 @@ export default function PersonalMission() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20">
-      <div className="container max-w-4xl mx-auto p-4 pt-16">
+    <div className="min-h-screen bg-gradient-to-br from-primary/30 via-purple-500/20 via-70% to-secondary/40">
+      <div className="container max-w-6xl mx-auto p-4 pt-16">
         <div className="mb-8 flex items-center gap-4">
           <Button
             variant="ghost"
@@ -133,53 +132,48 @@ export default function PersonalMission() {
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
-              <CardDescription>
-                Edit your personal mission or retake the questions to generate a new one
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mission">Personal Mission</Label>
-                <Textarea
-                  id="mission"
-                  value={personalMission}
-                  onChange={(e) => setPersonalMission(e.target.value)}
-                  placeholder="Your personal mission..."
-                  className="min-h-32"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={handleSaveMission} 
-                  disabled={savingMission}
-                  className="w-full"
-                >
-                  {savingMission ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleRetakeOnboarding}
-                  className="w-full"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retake Questions
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Edit your personal mission or retake the questions to generate a new one
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="mission">Personal Mission</Label>
+              <Textarea
+                id="mission"
+                value={personalMission}
+                onChange={(e) => setPersonalMission(e.target.value)}
+                placeholder="Your personal mission..."
+                className="min-h-[200px] text-base"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button 
+                onClick={handleSaveMission} 
+                disabled={savingMission}
+                className="w-full"
+              >
+                {savingMission ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleRetakeOnboarding}
+                className="w-full"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retake Questions
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
