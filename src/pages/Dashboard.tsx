@@ -217,8 +217,33 @@ export default function Dashboard() {
         .eq('user_id', userId)
         .order('date', { ascending: false });
 
-      if (alignments) {
-        setStreakCount(alignments.length);
+      if (alignments && alignments.length > 0) {
+        // Get unique dates
+        const uniqueDates = [...new Set(alignments.map(a => a.date))].sort((a, b) => b.localeCompare(a));
+        
+        // Calculate consecutive days streak from today backwards
+        let streak = 0;
+        const today = getCurrentDate(userTimezone);
+        
+        for (let i = 0; i < uniqueDates.length; i++) {
+          const expectedDate = new Date(today);
+          expectedDate.setDate(expectedDate.getDate() - i);
+          const expectedDateStr = expectedDate.toISOString().split('T')[0];
+          
+          if (uniqueDates[i] === expectedDateStr) {
+            streak++;
+          } else if (i === 0 && uniqueDates[0] !== today) {
+            // If today has no alignment, streak is 0
+            break;
+          } else {
+            // Streak broken
+            break;
+          }
+        }
+        
+        setStreakCount(streak);
+      } else {
+        setStreakCount(0);
       }
     } catch (error: any) {
       console.error('Error loading user data:', error);
@@ -358,7 +383,7 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="bg-gradient-to-br from-purple-500/15 via-background via-70% to-purple-600/15 border-purple-500/20 cursor-pointer hover:opacity-80 transition-opacity"
+          className="bg-gradient-to-br from-purple-500/15 via-background via-70% to-purple-600/15 border-amber-500/30 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate("/generate-intentions")}
         >
           <CardHeader>
