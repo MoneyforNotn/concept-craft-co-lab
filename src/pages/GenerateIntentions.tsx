@@ -98,7 +98,7 @@ export default function GenerateIntentions() {
             <Card className="max-w-[80%] bg-primary/10 border-primary/20">
               <CardContent className="p-4">
                 <p className="text-base">
-                  Create daily intentions tailored for me
+                  Create Daily Alignments tailored for My Personal Mission
                 </p>
               </CardContent>
             </Card>
