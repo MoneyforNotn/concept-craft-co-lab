@@ -79,7 +79,7 @@ export default function GenerateIntentions() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500/15 via-background via-50% to-purple-600/15">
+    <div className="min-h-screen bg-gradient-to-br from-purple-500/15 via-background via-70% to-purple-600/15">
       <div className="container max-w-4xl mx-auto p-4 pt-16">
         <div className="mb-8 flex items-center gap-4">
           <Button
