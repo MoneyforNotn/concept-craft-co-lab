@@ -394,94 +394,48 @@ export default function AlignmentDetail() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notes & Reflections</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add your thoughts, reflections, or how you embodied your alignment today..."
-              className="min-h-32"
-            />
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button onClick={handleSaveNotes} disabled={saving} className="flex-1">
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Notes"
-                )}
-              </Button>
-              <Button onClick={handleAddPhoto} variant="outline" className="flex-1">
-                <Camera className="mr-2 h-4 w-4" />
-                Add Photo
-              </Button>
-            </div>
-
-            {/* Display past reflections */}
-            {reflections.length > 0 && (
-              <div className="mt-6 pt-6 border-t space-y-4">
-                <h3 className="font-medium">Past Reflections</h3>
-                {reflections.map((reflection, index) => (
-                  <div key={reflection.id} className="bg-muted/30 rounded-lg p-4 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <StarRating rating={reflection.star_rating} readonly size={20} />
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(reflection.created_at), 'MMM d, yyyy h:mm a')}
-                      </span>
-                    </div>
-                    {reflection.notes && (
-                      <p className="text-sm text-muted-foreground">{reflection.notes}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Reflection Form */}
-        <ReflectionForm
-          alignmentId={id!}
-          onReflectionAdded={loadAlignment}
-          canAddReflection={canAddReflection}
-          nextReflectionTime={
-            reflections.length > 0
-              ? new Date(new Date(reflections[0].created_at).getTime() + 60 * 60 * 1000)
-              : undefined
-          }
-        />
+        <div className="mb-6">
+          <ReflectionForm
+            alignmentId={id!}
+            onReflectionAdded={loadAlignment}
+            canAddReflection={canAddReflection}
+            nextReflectionTime={
+              reflections.length > 0
+                ? new Date(new Date(reflections[0].created_at).getTime() + 60 * 60 * 1000)
+                : undefined
+            }
+          />
+        </div>
 
-        <Card className="border-destructive/50">
-          <CardContent className="pt-6">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Alignment
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Alignment?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your alignment entry.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
+        <div className="mb-6">
+          <Card className="border-destructive/50">
+            <CardContent className="pt-6">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Alignment
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Alignment?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your alignment entry.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardContent>
+          </Card>
+        </div>
 
         {todayAlignmentCount < 2 && alignment.date === new Date().toISOString().split('T')[0] && (
           <Card className="border-dashed">
