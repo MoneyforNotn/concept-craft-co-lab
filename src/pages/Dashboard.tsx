@@ -218,33 +218,9 @@ export default function Dashboard() {
         .order('date', { ascending: false });
 
       if (alignments) {
-        // Get unique dates to count days, not alignments
+        // Count unique days with alignments, not consecutive days
         const uniqueDates = [...new Set(alignments.map(a => a.date))];
-        
-        // Calculate consecutive streak from today backwards
-        let streak = 0;
-        let currentDate = new Date(today);
-        
-        for (const dateStr of uniqueDates) {
-          const alignmentDate = dateStr.split('T')[0]; // Ensure we're comparing dates only
-          const expectedDate = currentDate.toISOString().split('T')[0];
-          
-          if (alignmentDate === expectedDate) {
-            streak++;
-            currentDate.setDate(currentDate.getDate() - 1);
-          } else {
-            // Check if the streak was broken
-            const alignmentDateObj = new Date(alignmentDate);
-            const expectedDateObj = new Date(expectedDate);
-            
-            if (alignmentDateObj < expectedDateObj) {
-              // If alignment date is in the past and we missed a day, streak is broken
-              break;
-            }
-          }
-        }
-        
-        setStreakCount(streak);
+        setStreakCount(uniqueDates.length);
       }
 
     } catch (error: any) {
