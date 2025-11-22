@@ -218,8 +218,35 @@ export default function Dashboard() {
         .order('date', { ascending: false });
 
       if (alignments) {
-        setStreakCount(alignments.length);
+        // Get unique dates to count days, not alignments
+        const uniqueDates = [...new Set(alignments.map(a => a.date))];
+        
+        // Calculate consecutive streak from today backwards
+        let streak = 0;
+        let currentDate = new Date(today);
+        
+        for (const dateStr of uniqueDates) {
+          const alignmentDate = dateStr.split('T')[0]; // Ensure we're comparing dates only
+          const expectedDate = currentDate.toISOString().split('T')[0];
+          
+          if (alignmentDate === expectedDate) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          } else {
+            // Check if the streak was broken
+            const alignmentDateObj = new Date(alignmentDate);
+            const expectedDateObj = new Date(expectedDate);
+            
+            if (alignmentDateObj < expectedDateObj) {
+              // If alignment date is in the past and we missed a day, streak is broken
+              break;
+            }
+          }
+        }
+        
+        setStreakCount(streak);
       }
+
     } catch (error: any) {
       console.error('Error loading user data:', error);
     }
