@@ -20,6 +20,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useTestNotification } from "@/contexts/TestNotificationContext";
+import AlignmentHeatmap from "@/components/AlignmentHeatmap";
 
 const quotes = [
   { text: "The unexamined life is not worth living.", author: "Socrates" },
@@ -58,6 +59,7 @@ export default function Dashboard() {
   const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
   const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
   const [openAboutNotifications, setOpenAboutNotifications] = useState(false);
+  const [allAlignments, setAllAlignments] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -221,6 +223,7 @@ export default function Dashboard() {
         // Count unique days with alignments, not consecutive days
         const uniqueDates = [...new Set(alignments.map(a => a.date))];
         setStreakCount(uniqueDates.length);
+        setAllAlignments(alignments);
       }
 
     } catch (error: any) {
@@ -486,6 +489,8 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            <AlignmentHeatmap alignments={allAlignments} />
 
             <Card>
               <CardHeader className="pb-3">
