@@ -55,6 +55,7 @@ export default function Dashboard() {
   const [hasNotifications, setHasNotifications] = useState(false);
   const [quote, setQuote] = useState(quotes[0]);
   const [hideStreakProgress, setHideStreakProgress] = useState(false);
+  const [hideHeatmap, setHideHeatmap] = useState(false);
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
   const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
@@ -166,6 +167,7 @@ export default function Dashboard() {
 
       setProfile(profileData);
       setHideStreakProgress(profileData?.hide_streak_progress ?? false);
+      setHideHeatmap(profileData?.hide_heatmap ?? false);
 
       if (profileData && !profileData.onboarding_completed) {
         navigate("/onboarding");
@@ -490,7 +492,7 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <AlignmentHeatmap alignments={allAlignments} />
+            {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} />}
 
             <Card>
               <CardHeader className="pb-3">

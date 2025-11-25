@@ -36,6 +36,7 @@ export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showQuotes, setShowQuotes] = useState(true);
   const [hideStreakProgress, setHideStreakProgress] = useState(false);
+  const [hideHeatmap, setHideHeatmap] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [scheduleTestNotification, setScheduleTestNotification] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState("");
@@ -80,7 +81,7 @@ export default function Settings() {
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('timezone, show_quotes, hide_streak_progress')
+        .select('timezone, show_quotes, hide_streak_progress, hide_heatmap')
         .eq('id', user.id)
         .single();
 
@@ -88,6 +89,7 @@ export default function Settings() {
         setTimezone(profileData.timezone || "local");
         setShowQuotes(profileData.show_quotes ?? true);
         setHideStreakProgress(profileData.hide_streak_progress ?? false);
+        setHideHeatmap(profileData.hide_heatmap ?? false);
       }
 
       // Load notification settings
@@ -508,6 +510,41 @@ export default function Settings() {
                       description: error.message,
                     });
                     setHideStreakProgress(!checked);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="hide-heatmap">Hide Activity Calendar</Label>
+              </div>
+              <Switch
+                id="hide-heatmap"
+                checked={hideHeatmap}
+                onCheckedChange={async (checked) => {
+                  setHideHeatmap(checked);
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const { error } = await supabase
+                      .from('profiles')
+                      .update({ hide_heatmap: checked })
+                      .eq('id', user.id);
+
+                    if (error) throw error;
+
+                    toast({
+                      title: checked ? "Activity calendar hidden" : "Activity calendar shown",
+                    });
+                  } catch (error: any) {
+                    toast({
+                      variant: "destructive",
+                      title: "Error updating preference",
+                      description: error.message,
+                    });
+                    setHideHeatmap(!checked);
                   }
                 }}
               />
