@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AlignmentHeatmapProps {
-  alignments: { date: string }[];
+  alignments: { date: string; hasReflection: boolean }[];
 }
 
 export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) {
@@ -13,15 +13,17 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     const startDate = new Date(today);
     startDate.setDate(startDate.getDate() - 83); // 84 days including today
     
-    // Create a map of dates to alignment counts
-    const dateMap = new Map<string, number>();
+    // Create a map of dates to reflection status
+    const dateMap = new Map<string, boolean>();
     alignments.forEach(alignment => {
       const date = alignment.date.split('T')[0];
-      dateMap.set(date, (dateMap.get(date) || 0) + 1);
+      if (alignment.hasReflection) {
+        dateMap.set(date, true);
+      }
     });
     
     // Generate grid: 7 rows (days) x 12 columns (weeks)
-    const grid: Array<Array<{ date: Date; count: number } | null>> = Array(7).fill(null).map(() => []);
+    const grid: Array<Array<{ date: Date; hasReflection: boolean } | null>> = Array(7).fill(null).map(() => []);
     
     // Start from the first Sunday before or on startDate
     const firstSunday = new Date(startDate);
@@ -36,11 +38,11 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
         const date = new Date(firstSunday);
         date.setDate(firstSunday.getDate() + (week * 7) + day);
         const dateStr = date.toISOString().split('T')[0];
-        const count = dateMap.get(dateStr) || 0;
+        const hasReflection = dateMap.get(dateStr) || false;
         
         // Only show dates within our range
         if (date >= startDate && date <= today) {
-          grid[day][week] = { date, count };
+          grid[day][week] = { date, hasReflection };
         } else {
           grid[day][week] = null;
         }
@@ -50,11 +52,9 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     return grid;
   }, [alignments]);
   
-  const getIntensityClass = (count: number) => {
-    if (count === 0) return "bg-muted/30 hover:bg-muted/40";
-    if (count === 1) return "bg-primary/30 hover:bg-primary/40";
-    if (count === 2) return "bg-primary/60 hover:bg-primary/70";
-    return "bg-primary hover:bg-primary/90";
+  const getIntensityClass = (hasReflection: boolean) => {
+    if (hasReflection) return "bg-primary hover:bg-primary/90";
+    return "bg-muted/30 hover:bg-muted/40";
   };
   
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -89,14 +89,14 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
             {/* Calendar grid - rows are days of week, columns are weeks */}
             <div className="flex gap-1">
               {/* Day labels */}
-              <div className="flex flex-col gap-1 text-xs text-muted-foreground justify-start">
-                <div className="h-3 flex items-center">Sun</div>
-                <div className="h-3 flex items-center">Mon</div>
-                <div className="h-3 flex items-center">Tue</div>
-                <div className="h-3 flex items-center">Wed</div>
-                <div className="h-3 flex items-center">Thu</div>
-                <div className="h-3 flex items-center">Fri</div>
-                <div className="h-3 flex items-center">Sat</div>
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground justify-between w-8">
+                <div className="h-3 flex items-center justify-start">Sun</div>
+                <div className="h-3 flex items-center justify-start">Mon</div>
+                <div className="h-3 flex items-center justify-start">Tue</div>
+                <div className="h-3 flex items-center justify-start">Wed</div>
+                <div className="h-3 flex items-center justify-start">Thu</div>
+                <div className="h-3 flex items-center justify-start">Fri</div>
+                <div className="h-3 flex items-center justify-start">Sat</div>
               </div>
               
               {/* Heatmap grid */}
@@ -118,14 +118,14 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                         <Tooltip key={weekIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.count)}`}
+                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.hasReflection)}`}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-sm">
-                              {cell.count === 0 
-                                ? `No alignments on ${dateStr}` 
-                                : `${cell.count} alignment${cell.count > 1 ? 's' : ''} on ${dateStr}`
+                              {cell.hasReflection 
+                                ? `Reflection completed on ${dateStr}` 
+                                : `No reflection on ${dateStr}`
                               }
                             </p>
                           </TooltipContent>
@@ -135,18 +135,6 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                   </div>
                 ))}
               </div>
-            </div>
-            
-            {/* Legend */}
-            <div className="flex items-center gap-2 justify-end text-xs text-muted-foreground pt-2">
-              <span>Less</span>
-              <div className="flex gap-1">
-                <div className="w-3 h-3 rounded-sm bg-muted/30" />
-                <div className="w-3 h-3 rounded-sm bg-primary/30" />
-                <div className="w-3 h-3 rounded-sm bg-primary/60" />
-                <div className="w-3 h-3 rounded-sm bg-primary" />
-              </div>
-              <span>More</span>
             </div>
           </div>
         </TooltipProvider>

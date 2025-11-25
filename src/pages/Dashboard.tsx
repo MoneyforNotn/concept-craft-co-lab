@@ -60,7 +60,7 @@ export default function Dashboard() {
   const [canAddReflection, setCanAddReflection] = useState<Record<string, boolean>>({});
   const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
   const [openAboutNotifications, setOpenAboutNotifications] = useState(false);
-  const [allAlignments, setAllAlignments] = useState<any[]>([]);
+  const [allAlignments, setAllAlignments] = useState<Array<{ date: string; hasReflection: boolean }>>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -217,7 +217,10 @@ export default function Dashboard() {
 
       const { data: alignments } = await supabase
         .from('daily_alignments')
-        .select('date')
+        .select(`
+          date,
+          alignment_reflections (id)
+        `)
         .eq('user_id', userId)
         .order('date', { ascending: false });
 
@@ -225,7 +228,10 @@ export default function Dashboard() {
         // Count unique days with alignments, not consecutive days
         const uniqueDates = [...new Set(alignments.map(a => a.date))];
         setStreakCount(uniqueDates.length);
-        setAllAlignments(alignments);
+        setAllAlignments(alignments.map(a => ({
+          date: a.date,
+          hasReflection: a.alignment_reflections && a.alignment_reflections.length > 0
+        })));
       }
 
     } catch (error: any) {
