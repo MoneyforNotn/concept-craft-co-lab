@@ -20,25 +20,34 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
       dateMap.set(date, (dateMap.get(date) || 0) + 1);
     });
     
-    // Generate all dates for the last 12 weeks
-    const weeks: Array<Array<{ date: Date; count: number }>> = [];
-    let currentWeek: Array<{ date: Date; count: number }> = [];
+    // Generate grid: 7 rows (days) x 12 columns (weeks)
+    const grid: Array<Array<{ date: Date; count: number } | null>> = Array(7).fill(null).map(() => []);
     
-    for (let i = 0; i < 84; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      const count = dateMap.get(dateStr) || 0;
-      
-      currentWeek.push({ date, count });
-      
-      if (date.getDay() === 6 || i === 83) { // Saturday or last day
-        weeks.push(currentWeek);
-        currentWeek = [];
+    // Start from the first Sunday before or on startDate
+    const firstSunday = new Date(startDate);
+    const dayOfWeek = firstSunday.getDay();
+    if (dayOfWeek !== 0) {
+      firstSunday.setDate(firstSunday.getDate() - dayOfWeek);
+    }
+    
+    // Fill the grid: rows = days of week, columns = weeks
+    for (let week = 0; week < 12; week++) {
+      for (let day = 0; day < 7; day++) {
+        const date = new Date(firstSunday);
+        date.setDate(firstSunday.getDate() + (week * 7) + day);
+        const dateStr = date.toISOString().split('T')[0];
+        const count = dateMap.get(dateStr) || 0;
+        
+        // Only show dates within our range
+        if (date >= startDate && date <= today) {
+          grid[day][week] = { date, count };
+        } else {
+          grid[day][week] = null;
+        }
       }
     }
     
-    return weeks;
+    return grid;
   }, [alignments]);
   
   const getIntensityClass = (count: number) => {
@@ -58,16 +67,17 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
       <CardContent>
         <TooltipProvider>
           <div className="space-y-2">
-            {/* Weekday labels */}
+            {/* Month labels - shown at the top for each week column */}
             <div className="flex gap-1">
-              <div className="w-8" /> {/* Spacer for alignment */}
+              <div className="w-8" /> {/* Spacer for day labels */}
               <div className="flex-1 grid grid-cols-12 gap-1 text-xs text-muted-foreground">
-                {heatmapData.map((week, weekIndex) => {
-                  const firstDay = week[0];
-                  if (firstDay && firstDay.date.getDate() <= 7) {
+                {Array(12).fill(null).map((_, weekIndex) => {
+                  // Find the first non-null cell in this week column
+                  const firstDayInWeek = heatmapData.find(row => row[weekIndex] !== null)?.[weekIndex];
+                  if (firstDayInWeek && firstDayInWeek.date.getDate() <= 7) {
                     return (
                       <div key={weekIndex} className="text-center">
-                        {months[firstDay.date.getMonth()]}
+                        {months[firstDayInWeek.date.getMonth()]}
                       </div>
                     );
                   }
@@ -76,42 +86,46 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
               </div>
             </div>
             
-            {/* Calendar grid */}
+            {/* Calendar grid - rows are days of week, columns are weeks */}
             <div className="flex gap-1">
               {/* Day labels */}
-              <div className="flex flex-col gap-1 text-xs text-muted-foreground justify-around pr-1">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground justify-start">
+                <div className="h-3 flex items-center">Sun</div>
+                <div className="h-3 flex items-center">Mon</div>
+                <div className="h-3 flex items-center">Tue</div>
+                <div className="h-3 flex items-center">Wed</div>
+                <div className="h-3 flex items-center">Thu</div>
+                <div className="h-3 flex items-center">Fri</div>
+                <div className="h-3 flex items-center">Sat</div>
               </div>
               
-              {/* Heatmap */}
-              <div className="flex-1 grid grid-cols-12 gap-1">
-                {heatmapData.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-1">
-                    {week.map((day, dayIndex) => {
-                      const dateStr = day.date.toLocaleDateString('en-US', { 
+              {/* Heatmap grid */}
+              <div className="flex-1 grid grid-rows-7 gap-1">
+                {heatmapData.map((dayRow, dayIndex) => (
+                  <div key={dayIndex} className="grid grid-cols-12 gap-1">
+                    {dayRow.map((cell, weekIndex) => {
+                      if (!cell) {
+                        return <div key={weekIndex} className="aspect-square" />;
+                      }
+                      
+                      const dateStr = cell.date.toLocaleDateString('en-US', { 
                         month: 'short', 
                         day: 'numeric',
                         year: 'numeric'
                       });
                       
                       return (
-                        <Tooltip key={dayIndex}>
+                        <Tooltip key={weekIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`aspect-square rounded-sm transition-all ${getIntensityClass(day.count)}`}
+                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.count)}`}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-sm">
-                              {day.count === 0 
+                              {cell.count === 0 
                                 ? `No alignments on ${dateStr}` 
-                                : `${day.count} alignment${day.count > 1 ? 's' : ''} on ${dateStr}`
+                                : `${cell.count} alignment${cell.count > 1 ? 's' : ''} on ${dateStr}`
                               }
                             </p>
                           </TooltipContent>
