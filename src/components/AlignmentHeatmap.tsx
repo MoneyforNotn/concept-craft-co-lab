@@ -4,10 +4,23 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface AlignmentHeatmapProps {
   alignments: { date: string; hasReflection: boolean }[];
+  timezone?: string;
 }
 
-export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) {
+export default function AlignmentHeatmap({ alignments, timezone = 'local' }: AlignmentHeatmapProps) {
   const heatmapData = useMemo(() => {
+    // Helper function to format date in user's timezone
+    const formatDateInTimezone = (date: Date): string => {
+      if (timezone === 'local') {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      } else {
+        return date.toLocaleDateString('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' });
+      }
+    };
+    
     // Get the last 12 weeks (84 days)
     const today = new Date();
     today.setHours(23, 59, 59, 999); // End of today
@@ -41,7 +54,7 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
       for (let day = 0; day < 7; day++) {
         const date = new Date(firstSunday);
         date.setDate(firstSunday.getDate() + (week * 7) + day);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = formatDateInTimezone(date);
         const dayData = dateMap.get(dateStr);
         
         // Show all dates within range
@@ -58,7 +71,7 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     }
     
     return grid;
-  }, [alignments]);
+  }, [alignments, timezone]);
   
   const getIntensityClass = (hasAlignment: boolean, hasReflection: boolean) => {
     if (hasReflection) {

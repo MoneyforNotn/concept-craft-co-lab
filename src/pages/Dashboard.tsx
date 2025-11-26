@@ -518,7 +518,7 @@ export default function Dashboard() {
           </>
         )}
 
-        {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} />}
+        {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} timezone={profile?.timezone} />}
 
         <div className="grid grid-cols-3 gap-4 pb-3">
           <Button
