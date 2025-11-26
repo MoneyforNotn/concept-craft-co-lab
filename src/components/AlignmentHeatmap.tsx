@@ -52,17 +52,18 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     return grid;
   }, [alignments]);
   
-  const getIntensityClass = (hasReflection: boolean) => {
-    if (hasReflection) return "bg-primary hover:bg-primary/90";
-    return "bg-muted/30 hover:bg-muted/40";
+  const getIntensityClass = (cell: { date: Date; hasReflection: boolean } | null) => {
+    if (!cell) return "";
+    if (cell.hasReflection) return "bg-primary hover:bg-primary/90";
+    return "bg-primary/20 hover:bg-primary/30";
   };
   
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Activity Calendar</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Activity Calendar</CardTitle>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
@@ -74,12 +75,17 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                 {Array(12).fill(null).map((_, weekIndex) => {
                   // Find the first non-null cell in this week column
                   const firstDayInWeek = heatmapData.find(row => row[weekIndex] !== null)?.[weekIndex];
-                  if (firstDayInWeek && firstDayInWeek.date.getDate() <= 7) {
-                    return (
-                      <div key={weekIndex} className="text-center">
-                        {months[firstDayInWeek.date.getMonth()]}
-                      </div>
-                    );
+                  // Only show month label on weeks that contain the 1st of the month
+                  if (firstDayInWeek) {
+                    const weekDates = heatmapData.map(row => row[weekIndex]).filter(cell => cell !== null);
+                    const hasFirstOfMonth = weekDates.some(cell => cell && cell.date.getDate() === 1);
+                    if (hasFirstOfMonth) {
+                      return (
+                        <div key={weekIndex} className="text-center">
+                          {months[firstDayInWeek.date.getMonth()]}
+                        </div>
+                      );
+                    }
                   }
                   return <div key={weekIndex} />;
                 })}
@@ -118,14 +124,14 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                         <Tooltip key={weekIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.hasReflection)}`}
+                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell)}`}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-sm">
                               {cell.hasReflection 
                                 ? `Reflection completed on ${dateStr}` 
-                                : `No reflection on ${dateStr}`
+                                : `Alignment created on ${dateStr}`
                               }
                             </p>
                           </TooltipContent>
