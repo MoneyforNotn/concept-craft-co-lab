@@ -61,7 +61,7 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
   
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="text-lg">Activity Calendar</CardTitle>
       </CardHeader>
       <CardContent>
@@ -74,7 +74,15 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                 {Array(12).fill(null).map((_, weekIndex) => {
                   // Find the first non-null cell in this week column
                   const firstDayInWeek = heatmapData.find(row => row[weekIndex] !== null)?.[weekIndex];
-                  if (firstDayInWeek && firstDayInWeek.date.getDate() <= 7) {
+                  // Only show month label if it's the first week of that month or first column
+                  const prevWeekFirstDay = weekIndex > 0 ? heatmapData.find(row => row[weekIndex - 1] !== null)?.[weekIndex - 1] : null;
+                  const showLabel = firstDayInWeek && (
+                    weekIndex === 0 || 
+                    !prevWeekFirstDay || 
+                    prevWeekFirstDay.date.getMonth() !== firstDayInWeek.date.getMonth()
+                  );
+                  
+                  if (showLabel) {
                     return (
                       <div key={weekIndex} className="text-center">
                         {months[firstDayInWeek.date.getMonth()]}
