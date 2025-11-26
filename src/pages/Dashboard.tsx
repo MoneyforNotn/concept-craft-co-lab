@@ -498,6 +498,8 @@ export default function Dashboard() {
               </Card>
             </div>
 
+            {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} />}
+
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -517,8 +519,6 @@ export default function Dashboard() {
             </Card>
           </>
         )}
-
-        {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} />}
 
         <div className="grid grid-cols-3 gap-4 pb-3">
           <Button

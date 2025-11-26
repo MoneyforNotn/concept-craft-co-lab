@@ -10,25 +10,20 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
   const heatmapData = useMemo(() => {
     // Get the last 12 weeks (84 days)
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // End of today
     const startDate = new Date(today);
     startDate.setDate(startDate.getDate() - 83); // 84 days including today
-    startDate.setHours(0, 0, 0, 0); // Start of that day
     
-    // Create maps for alignments and reflections
-    const alignmentDates = new Map<string, boolean>(); // Has any alignment
-    const reflectionDates = new Map<string, boolean>(); // Has reflection
-    
+    // Create a map of dates to reflection status
+    const dateMap = new Map<string, boolean>();
     alignments.forEach(alignment => {
       const date = alignment.date.split('T')[0];
-      alignmentDates.set(date, true);
       if (alignment.hasReflection) {
-        reflectionDates.set(date, true);
+        dateMap.set(date, true);
       }
     });
     
     // Generate grid: 7 rows (days) x 12 columns (weeks)
-    const grid: Array<Array<{ date: Date; hasReflection: boolean; hasAlignment: boolean } | null>> = Array(7).fill(null).map(() => []);
+    const grid: Array<Array<{ date: Date; hasReflection: boolean } | null>> = Array(7).fill(null).map(() => []);
     
     // Start from the first Sunday before or on startDate
     const firstSunday = new Date(startDate);
@@ -43,12 +38,11 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
         const date = new Date(firstSunday);
         date.setDate(firstSunday.getDate() + (week * 7) + day);
         const dateStr = date.toISOString().split('T')[0];
-        const hasAlignment = alignmentDates.has(dateStr);
-        const hasReflection = reflectionDates.has(dateStr);
+        const hasReflection = dateMap.get(dateStr) || false;
         
-        // Only show dates within our range and that have alignments
-        if (date >= startDate && date <= today && hasAlignment) {
-          grid[day][week] = { date, hasReflection, hasAlignment };
+        // Only show dates within our range
+        if (date >= startDate && date <= today) {
+          grid[day][week] = { date, hasReflection };
         } else {
           grid[day][week] = null;
         }
@@ -58,19 +52,17 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     return grid;
   }, [alignments]);
   
-  const getIntensityClass = (cell: { date: Date; hasReflection: boolean; hasAlignment: boolean } | null) => {
-    if (!cell) return "";
-    if (cell.hasReflection) return "bg-primary hover:bg-primary/90";
-    if (cell.hasAlignment) return "bg-primary/30 hover:bg-primary/40";
-    return "";
+  const getIntensityClass = (hasReflection: boolean) => {
+    if (hasReflection) return "bg-primary hover:bg-primary/90";
+    return "bg-muted/30 hover:bg-muted/40";
   };
   
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Activity Calendar</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-lg">Activity Calendar</CardTitle>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
@@ -82,17 +74,12 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                 {Array(12).fill(null).map((_, weekIndex) => {
                   // Find the first non-null cell in this week column
                   const firstDayInWeek = heatmapData.find(row => row[weekIndex] !== null)?.[weekIndex];
-                  // Only show month label on weeks that contain the 1st of the month
-                  if (firstDayInWeek) {
-                    const weekDates = heatmapData.map(row => row[weekIndex]).filter(cell => cell !== null);
-                    const hasFirstOfMonth = weekDates.some(cell => cell && cell.date.getDate() === 1);
-                    if (hasFirstOfMonth) {
-                      return (
-                        <div key={weekIndex} className="text-center">
-                          {months[firstDayInWeek.date.getMonth()]}
-                        </div>
-                      );
-                    }
+                  if (firstDayInWeek && firstDayInWeek.date.getDate() <= 7) {
+                    return (
+                      <div key={weekIndex} className="text-center">
+                        {months[firstDayInWeek.date.getMonth()]}
+                      </div>
+                    );
                   }
                   return <div key={weekIndex} />;
                 })}
@@ -131,14 +118,14 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                         <Tooltip key={weekIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell)}`}
+                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.hasReflection)}`}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="text-sm">
                               {cell.hasReflection 
                                 ? `Reflection completed on ${dateStr}` 
-                                : `Alignment created on ${dateStr}`
+                                : `No reflection on ${dateStr}`
                               }
                             </p>
                           </TooltipContent>
