@@ -15,15 +15,15 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     startDate.setDate(startDate.getDate() - 83); // 84 days including today
     startDate.setHours(0, 0, 0, 0); // Start of that day
     
-    // Create a map of dates to reflection status
-    const dateMap = new Map<string, boolean>();
+    // Create a map of dates to alignment/reflection status
+    const dateMap = new Map<string, { hasAlignment: boolean; hasReflection: boolean }>();
     alignments.forEach(alignment => {
       const date = alignment.date.split('T')[0];
-      dateMap.set(date, alignment.hasReflection);
+      dateMap.set(date, { hasAlignment: true, hasReflection: alignment.hasReflection });
     });
     
     // Generate grid: 7 rows (days) x 12 columns (weeks)
-    const grid: Array<Array<{ date: Date; hasReflection: boolean } | null>> = Array(7).fill(null).map(() => []);
+    const grid: Array<Array<{ date: Date; hasAlignment: boolean; hasReflection: boolean } | null>> = Array(7).fill(null).map(() => []);
     
     // Start from the most recent Sunday (or today if today is Sunday)
     const lastSunday = new Date(today);
@@ -42,15 +42,15 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
         const date = new Date(firstSunday);
         date.setDate(firstSunday.getDate() + (week * 7) + day);
         const dateStr = date.toISOString().split('T')[0];
-        const hasAlignment = dateMap.has(dateStr);
-        const hasReflection = dateMap.get(dateStr) || false;
+        const dayData = dateMap.get(dateStr);
         
-        // Only show dates that have alignments and are within range
-        if (hasAlignment && date >= startDate && date <= today) {
-          grid[day][week] = { date, hasReflection };
-        } else if (date <= today) {
-          // Show empty cells for dates without alignments but within range
-          grid[day][week] = null;
+        // Show all dates within range
+        if (date >= startDate && date <= today) {
+          grid[day][week] = { 
+            date, 
+            hasAlignment: dayData?.hasAlignment || false,
+            hasReflection: dayData?.hasReflection || false 
+          };
         } else {
           grid[day][week] = null;
         }
@@ -60,11 +60,14 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
     return grid;
   }, [alignments]);
   
-  const getIntensityClass = (hasReflection: boolean) => {
+  const getIntensityClass = (hasAlignment: boolean, hasReflection: boolean) => {
     if (hasReflection) {
       return "bg-primary hover:bg-primary/90"; // Dark purple for days with reflections
     }
-    return "bg-primary/40 hover:bg-primary/50"; // Light purple for days with alignments only
+    if (hasAlignment) {
+      return "bg-primary/40 hover:bg-primary/50"; // Light purple for days with alignments only
+    }
+    return "border border-muted-foreground/20 hover:border-muted-foreground/40"; // Empty outline for days without alignments
   };
   
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -132,20 +135,22 @@ export default function AlignmentHeatmap({ alignments }: AlignmentHeatmapProps) 
                         year: 'numeric'
                       });
                       
+                      let tooltipText = `No alignment on ${dateStr}`;
+                      if (cell.hasReflection) {
+                        tooltipText = `Alignment and reflection on ${dateStr}`;
+                      } else if (cell.hasAlignment) {
+                        tooltipText = `Alignment created on ${dateStr}`;
+                      }
+                      
                       return (
                         <Tooltip key={weekIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.hasReflection)}`}
+                              className={`aspect-square rounded-sm transition-all cursor-pointer ${getIntensityClass(cell.hasAlignment, cell.hasReflection)}`}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p className="text-sm">
-                              {cell.hasReflection 
-                                ? `Reflection completed on ${dateStr}` 
-                                : `No reflection on ${dateStr}`
-                              }
-                            </p>
+                            <p className="text-sm">{tooltipText}</p>
                           </TooltipContent>
                         </Tooltip>
                       );
