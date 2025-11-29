@@ -508,7 +508,9 @@ export default function Dashboard() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium">Tier Progress</CardTitle>
-                  <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} text-white`}>
+                  <Badge className={`bg-gradient-to-r ${getTierInfo(streakCount).color} border-0 ${
+                    streakCount >= 10 && streakCount < 20 ? 'text-gray-800' : 'text-white'
+                  }`}>
                     {getTierInfo(streakCount).tier}
                   </Badge>
                 </div>
