@@ -283,13 +283,13 @@ export default function Dashboard() {
     } else if (days >= 160) {
       return { tier: 'Diamond', icon: Award, color: 'from-cyan-400 to-blue-500' };
     } else if (days >= 80) {
-      return { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500' };
+      return { tier: 'Ruby', icon: SparklesIcon, color: 'from-red-500 to-pink-600' };
     } else if (days >= 40) {
       return { tier: 'Emerald', icon: SparklesIcon, color: 'from-emerald-500 to-green-500' };
     } else if (days >= 20) {
-      return { tier: 'Silver', icon: Medal, color: 'from-slate-400 to-slate-300' };
+      return { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500' };
     } else if (days >= 10) {
-      return { tier: 'Copper', icon: SparklesIcon, color: 'from-orange-500 to-amber-600' };
+      return { tier: 'Silver', icon: Medal, color: 'from-slate-400 to-slate-300' };
     } else if (days >= 5) {
       return { tier: 'Bronze', icon: Trophy, color: 'from-amber-700 to-amber-600' };
     }
