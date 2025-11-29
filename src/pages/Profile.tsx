@@ -130,10 +130,10 @@ export default function Profile() {
       };
     } else if (days >= 80) {
       return {
-        tier: 'Gold',
-        icon: Award,
-        color: 'from-yellow-500 to-amber-500',
-        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+        tier: 'Ruby',
+        icon: Trophy,
+        color: 'from-red-500 to-pink-600',
+        badgeColor: 'bg-gradient-to-r from-red-500 to-pink-600 text-white',
       };
     } else if (days >= 40) {
       return {
@@ -144,17 +144,17 @@ export default function Profile() {
       };
     } else if (days >= 20) {
       return {
+        tier: 'Gold',
+        icon: Award,
+        color: 'from-yellow-500 to-amber-500',
+        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+      };
+    } else if (days >= 10) {
+      return {
         tier: 'Silver',
         icon: Medal,
         color: 'from-slate-400 to-slate-300',
         badgeColor: 'bg-gradient-to-r from-slate-400 to-slate-300 text-white',
-      };
-    } else if (days === 10) {
-      return {
-        tier: 'Copper',
-        icon: Trophy,
-        color: 'from-orange-500 to-amber-600',
-        badgeColor: 'bg-gradient-to-r from-orange-500 to-amber-600 text-white',
       };
     } else {
       return {
