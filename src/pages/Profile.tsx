@@ -241,13 +241,38 @@ export default function Profile() {
                 </div>
               </div>
 
+              {/* Unlocked Achievement Icons */}
+              {achievements.length > 0 && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Trophy className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground mb-2">Unlocked Milestones</p>
+                    <div className="flex flex-wrap gap-2">
+                      {achievements.map((achievement) => {
+                        const tierInfo = getTierInfo(achievement.milestone_days);
+                        const Icon = tierInfo.icon;
+                        return (
+                          <div
+                            key={achievement.id}
+                            className={`p-2 rounded-lg bg-gradient-to-br ${tierInfo.color} shadow-sm`}
+                            title={`${achievement.milestone_days} Days - ${tierInfo.tier}`}
+                          >
+                            <Icon className="h-4 w-4 text-white" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Achievements</CardTitle>
+            <CardTitle className="text-2xl">Milestones</CardTitle>
             <CardDescription>
               Your mindfulness journey milestones
             </CardDescription>
