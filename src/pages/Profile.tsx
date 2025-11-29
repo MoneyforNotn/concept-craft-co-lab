@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Session } from "@supabase/supabase-js";
-import { ArrowLeft, LogOut, Mail, Calendar, Trophy, Lock, Award, Medal, Crown } from "lucide-react";
+import { ArrowLeft, LogOut, Mail, Calendar, Trophy, Lock, Award, Medal, Crown, Zap, Target, Gem } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -118,49 +118,49 @@ export default function Profile() {
       return {
         tier: 'Platinum',
         icon: Crown,
-        color: 'from-purple-500 to-pink-500',
+        color: 'from-purple-600 via-purple-500 to-pink-500',
         badgeColor: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
       };
-    } else if (days >= 160) {
+    } else if (days === 160) {
       return {
         tier: 'Diamond',
         icon: Award,
-        color: 'from-cyan-400 to-blue-500',
+        color: 'from-cyan-400 via-blue-500 to-indigo-600',
         badgeColor: 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
       };
-    } else if (days >= 80) {
-      return {
-        tier: 'Ruby',
-        icon: Trophy,
-        color: 'from-red-500 to-pink-600',
-        badgeColor: 'bg-gradient-to-r from-red-500 to-pink-600 text-white',
-      };
-    } else if (days >= 40) {
-      return {
-        tier: 'Emerald',
-        icon: Trophy,
-        color: 'from-emerald-500 to-green-500',
-        badgeColor: 'bg-gradient-to-r from-emerald-500 to-green-500 text-white',
-      };
-    } else if (days >= 20) {
+    } else if (days === 80) {
       return {
         tier: 'Gold',
         icon: Award,
-        color: 'from-yellow-500 to-amber-500',
+        color: 'from-yellow-400 via-yellow-500 to-amber-600',
         badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
       };
-    } else if (days >= 10) {
+    } else if (days === 40) {
       return {
         tier: 'Silver',
         icon: Medal,
-        color: 'from-slate-300 to-slate-100',
+        color: 'from-slate-300 via-slate-400 to-slate-500',
+        badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
+      };
+    } else if (days === 20) {
+      return {
+        tier: 'Bronze',
+        icon: Trophy,
+        color: 'from-orange-500 via-amber-600 to-orange-700',
+        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+      };
+    } else if (days === 10) {
+      return {
+        tier: 'Rising Star',
+        icon: Medal,
+        color: 'from-green-400 via-emerald-500 to-teal-600',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {
-        tier: 'Bronze',
+        tier: 'Beginner',
         icon: Trophy,
-        color: 'from-amber-700 to-amber-600',
+        color: 'from-blue-400 via-blue-500 to-blue-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
     }
@@ -254,10 +254,10 @@ export default function Profile() {
                         return (
                           <div
                             key={achievement.id}
-                            className={`p-2 rounded-lg bg-gradient-to-br ${tierInfo.color} shadow-sm`}
+                            className={`p-2.5 rounded-xl bg-gradient-to-br ${tierInfo.color} shadow-md`}
                             title={`${achievement.milestone_days} Days - ${tierInfo.tier}`}
                           >
-                            <Icon className="h-4 w-4 text-white" />
+                            <Icon className="h-5 w-5 text-white drop-shadow-lg" />
                           </div>
                         );
                       })}
