@@ -289,7 +289,7 @@ export default function Dashboard() {
     } else if (days >= 20) {
       return { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500' };
     } else if (days >= 10) {
-      return { tier: 'Silver', icon: Medal, color: 'from-slate-400 to-slate-300' };
+      return { tier: 'Silver', icon: Medal, color: 'from-slate-300 to-slate-100' };
     } else if (days >= 5) {
       return { tier: 'Bronze', icon: Trophy, color: 'from-amber-700 to-amber-600' };
     }

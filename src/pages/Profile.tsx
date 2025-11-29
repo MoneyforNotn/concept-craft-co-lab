@@ -153,8 +153,8 @@ export default function Profile() {
       return {
         tier: 'Silver',
         icon: Medal,
-        color: 'from-slate-400 to-slate-300',
-        badgeColor: 'bg-gradient-to-r from-slate-400 to-slate-300 text-white',
+        color: 'from-slate-300 to-slate-100',
+        badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {

@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { useTestNotification } from "@/contexts/TestNotificationContext";
-import { ArrowLeft, Loader2, Bell, BellOff, Clock, Moon, Sun, Play, Pause } from "lucide-react";
+import { ArrowLeft, Loader2, Bell, BellOff, Clock, Moon, Sun, Play, Pause, ChevronRight } from "lucide-react";
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
@@ -347,7 +347,10 @@ export default function Settings() {
             onClick={() => navigate("/personal-mission")}
           >
             <CardHeader>
-              <CardTitle className="text-2xl">Your Personal Mission</CardTitle>
+              <CardTitle className="text-2xl flex items-center justify-between">
+                Your Personal Mission
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardTitle>
             </CardHeader>
           </Card>
 
