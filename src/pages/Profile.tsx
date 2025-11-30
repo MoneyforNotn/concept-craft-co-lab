@@ -144,30 +144,23 @@ export default function Profile() {
       };
     } else if (days === 20) {
       return {
-        tier: 'Gold',
-        icon: Award,
-        color: 'from-yellow-400 via-yellow-500 to-amber-600',
+        tier: 'Bronze',
+        icon: Trophy,
+        color: 'from-orange-500 via-amber-600 to-orange-700',
         badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
       };
     } else if (days === 10) {
       return {
-        tier: 'Silver',
+        tier: 'Rising Star',
         icon: Medal,
-        color: 'from-slate-300 via-slate-400 to-slate-500',
+        color: 'from-green-400 via-emerald-500 to-teal-600',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
-      };
-    } else if (days === 5) {
-      return {
-        tier: 'Bronze',
-        icon: Trophy,
-        color: 'from-orange-500 via-amber-600 to-orange-700',
-        badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
     } else {
       return {
-        tier: 'Bronze',
+        tier: 'Beginner',
         icon: Trophy,
-        color: 'from-orange-500 via-amber-600 to-orange-700',
+        color: 'from-blue-400 via-blue-500 to-blue-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
     }
@@ -253,7 +246,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <Trophy className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-2">Unlocked Achievements</p>
+                    <p className="text-sm text-muted-foreground mb-2">Unlocked Milestones</p>
                     <div className="flex flex-wrap gap-2">
                       {achievements.map((achievement) => {
                         const tierInfo = getTierInfo(achievement.milestone_days);
