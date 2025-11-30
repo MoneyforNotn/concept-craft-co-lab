@@ -130,35 +130,35 @@ export default function Profile() {
       };
     } else if (days === 80) {
       return {
-        tier: 'Gold',
+        tier: 'Ruby',
         icon: Award,
         color: 'from-yellow-400 via-yellow-500 to-amber-600',
         badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
       };
     } else if (days === 40) {
       return {
-        tier: 'Silver',
+        tier: 'Emerald',
         icon: Medal,
         color: 'from-slate-300 via-slate-400 to-slate-500',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else if (days === 20) {
       return {
-        tier: 'Bronze',
+        tier: 'Gold',
         icon: Trophy,
         color: 'from-orange-500 via-amber-600 to-orange-700',
         badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
       };
     } else if (days === 10) {
       return {
-        tier: 'Rising Star',
+        tier: 'Silver',
         icon: Medal,
         color: 'from-green-400 via-emerald-500 to-teal-600',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {
-        tier: 'Beginner',
+        tier: 'Bronze',
         icon: Trophy,
         color: 'from-blue-400 via-blue-500 to-blue-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
