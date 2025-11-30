@@ -5,7 +5,6 @@ interface TimerState {
   countdown: number;
   isCountdownActive: boolean;
   isPaused: boolean;
-  resetCountdown: () => void;
   togglePause: () => void;
   stop: () => void;
   start: () => void;

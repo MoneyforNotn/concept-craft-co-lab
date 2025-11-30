@@ -375,22 +375,13 @@ export default function Settings() {
                       Next notification in: {timer1.countdown}s
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={timer1.togglePause}
-                    >
-                      {timer1.isPaused ? "Resume" : "Pause"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={timer1.resetCountdown}
-                    >
-                      Reset
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={timer1.togglePause}
+                  >
+                    {timer1.isPaused ? "Resume" : "Pause"}
+                  </Button>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
@@ -400,22 +391,13 @@ export default function Settings() {
                       Next notification in: {Math.floor(timer2.countdown / 60)}m {timer2.countdown % 60}s
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={timer2.togglePause}
-                    >
-                      {timer2.isPaused ? "Resume" : "Pause"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={timer2.resetCountdown}
-                    >
-                      Reset
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={timer2.togglePause}
+                  >
+                    {timer2.isPaused ? "Resume" : "Pause"}
+                  </Button>
                 </div>
               </div>
             </CardContent>
