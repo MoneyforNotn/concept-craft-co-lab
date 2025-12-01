@@ -124,7 +124,7 @@ export default function Profile() {
     } else if (days === 160) {
       return {
         tier: 'Diamond',
-        icon: Award,
+        icon: Gem,
         color: 'from-cyan-400 via-blue-500 to-indigo-600',
         badgeColor: 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
       };
@@ -152,14 +152,14 @@ export default function Profile() {
     } else if (days === 10) {
       return {
         tier: 'Silver',
-        icon: Medal,
+        icon: Zap,
         color: 'from-green-400 via-emerald-500 to-teal-600',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {
         tier: 'Bronze',
-        icon: Trophy,
+        icon: Target,
         color: 'from-blue-400 via-blue-500 to-blue-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
