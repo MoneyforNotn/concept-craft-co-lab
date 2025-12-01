@@ -109,9 +109,49 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const scheduledTimes = setting.scheduled_times || [];
+      let shouldSendNotification = false;
+      let isSecondNotification = false;
+
+      // Get user's last notification today
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
       
-      // Check if any of the scheduled times match current time
+      const { data: lastNotificationToday, error: logError } = await supabase
+        .from('notification_logs')
+        .select('sent_at')
+        .eq('user_id', setting.user_id)
+        .eq('status', 'success')
+        .gte('sent_at', todayStart.toISOString())
+        .order('sent_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (logError && logError.code !== 'PGRST116') {
+        console.error(`Error fetching notification log for user ${setting.user_id}:`, logError);
+      }
+
+      // Check if any of the scheduled times match current time (first notification)
       if (scheduledTimes.includes(currentTime)) {
+        // Only send if no notification sent today yet
+        if (!lastNotificationToday) {
+          shouldSendNotification = true;
+          isSecondNotification = false;
+          console.log(`First notification scheduled for user ${setting.user_id}`);
+        }
+      } else if (lastNotificationToday) {
+        // Check if 8 hours have passed since last notification (second notification)
+        const lastNotificationTime = new Date(lastNotificationToday.sent_at);
+        const hoursSinceLastNotification = (now.getTime() - lastNotificationTime.getTime()) / (1000 * 60 * 60);
+        
+        // Send second notification if 8+ hours have passed and we're within the same minute
+        if (hoursSinceLastNotification >= 8 && hoursSinceLastNotification < 8.017) {
+          shouldSendNotification = true;
+          isSecondNotification = true;
+          console.log(`Second notification (8 hours later) scheduled for user ${setting.user_id}`);
+        }
+      }
+
+      if (shouldSendNotification) {
         // Get user's OneSignal player ID
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -128,6 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
           notificationsToSend.push({
             playerId: profile.onesignal_player_id,
             userId: setting.user_id,
+            isSecondNotification,
           });
         } else {
           console.log(`User ${setting.user_id} has no OneSignal player ID`);
