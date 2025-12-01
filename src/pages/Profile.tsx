@@ -113,6 +113,16 @@ export default function Profile() {
     return "U";
   };
 
+  const getUnlockedMilestoneIcon = (days: number) => {
+    if (days === 365) return { icon: Crown, color: 'from-purple-600 via-purple-500 to-pink-500' };
+    if (days === 160) return { icon: Gem, color: 'from-cyan-400 via-blue-500 to-indigo-600' };
+    if (days === 80) return { icon: Award, color: 'from-yellow-400 via-yellow-500 to-amber-600' };
+    if (days === 40) return { icon: Medal, color: 'from-slate-300 via-slate-400 to-slate-500' };
+    if (days === 20) return { icon: Trophy, color: 'from-orange-500 via-amber-600 to-orange-700' };
+    if (days === 10) return { icon: Zap, color: 'from-green-400 via-emerald-500 to-teal-600' };
+    return { icon: Target, color: 'from-blue-400 via-blue-500 to-blue-600' };
+  };
+
   const getTierInfo = (days: number) => {
     if (days === 365) {
       return {
@@ -124,7 +134,7 @@ export default function Profile() {
     } else if (days === 160) {
       return {
         tier: 'Diamond',
-        icon: Gem,
+        icon: Award,
         color: 'from-cyan-400 via-blue-500 to-indigo-600',
         badgeColor: 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
       };
@@ -152,14 +162,14 @@ export default function Profile() {
     } else if (days === 10) {
       return {
         tier: 'Silver',
-        icon: Zap,
+        icon: Medal,
         color: 'from-green-400 via-emerald-500 to-teal-600',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {
         tier: 'Bronze',
-        icon: Target,
+        icon: Trophy,
         color: 'from-blue-400 via-blue-500 to-blue-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
@@ -249,12 +259,13 @@ export default function Profile() {
                     <p className="text-sm text-muted-foreground mb-2">Unlocked Milestones</p>
                     <div className="flex flex-wrap gap-2">
                       {achievements.map((achievement) => {
+                        const iconInfo = getUnlockedMilestoneIcon(achievement.milestone_days);
                         const tierInfo = getTierInfo(achievement.milestone_days);
-                        const Icon = tierInfo.icon;
+                        const Icon = iconInfo.icon;
                         return (
                           <div
                             key={achievement.id}
-                            className={`p-2.5 rounded-xl bg-gradient-to-br ${tierInfo.color} shadow-md`}
+                            className={`p-2.5 rounded-xl bg-gradient-to-br ${iconInfo.color} shadow-md`}
                             title={`${achievement.milestone_days} Days - ${tierInfo.tier}`}
                           >
                             <Icon className="h-5 w-5 text-white drop-shadow-lg" />
