@@ -355,6 +355,44 @@ export default function Settings() {
           </Card>
 
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center justify-between">
+              Automated Notifications
+              <Button
+                variant={notificationsEnabled ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleNotifications}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : notificationsEnabled ? (
+                  <>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Enabled
+                  </>
+                ) : (
+                  <>
+                    <BellOff className="mr-2 h-4 w-4" />
+                    Disabled
+                  </>
+                )}
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              Enable or disable all automated daily reminder notifications
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {notificationsEnabled 
+                ? "You will receive automated notifications at your scheduled times throughout the day."
+                : "All automated notifications are currently disabled. Enable them to receive daily reminders."}
+            </p>
+          </CardContent>
+        </Card>
+
         {isInitialized && playerId && (
           <Card>
             <CardHeader>

@@ -79,10 +79,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Current UTC time:', currentTime);
 
-    // Get all users with notification settings
+    // Get all users with notification settings (only enabled ones)
     const { data: notificationSettings, error: settingsError } = await supabase
       .from('notification_settings')
-      .select('user_id, scheduled_times, is_random')
+      .select('user_id, scheduled_times, is_random, enabled')
+      .eq('enabled', true)
       .not('scheduled_times', 'is', null);
 
     if (settingsError) {
