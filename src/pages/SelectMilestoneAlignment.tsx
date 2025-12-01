@@ -127,7 +127,7 @@ export default function SelectMilestoneAlignment() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg">
-                      {new Date(alignment.date).toLocaleDateString('en-US', {
+                      {new Date(alignment.date + 'T12:00:00').toLocaleDateString('en-US', {
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric'
