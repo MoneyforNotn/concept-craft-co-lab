@@ -46,9 +46,42 @@ export default function SelectMilestoneAlignment() {
     }
   };
 
-  const handleSave = async () => {
-    if (!selectedId || !milestone) return;
+  const handleSelect = async (alignmentId: string) => {
+    if (!milestone) return;
 
+    // Toggle off if clicking the same one
+    if (selectedId === alignmentId) {
+      setSelectedId(null);
+      setSaving(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
+
+        const { error } = await supabase
+          .from('milestone_achievements')
+          .update({ alignment_id: null })
+          .eq('user_id', user.id)
+          .eq('milestone_days', parseInt(milestone));
+
+        if (error) throw error;
+
+        toast({
+          title: "Featured alignment removed",
+        });
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message,
+        });
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
+    // Select new alignment
+    setSelectedId(alignmentId);
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -59,7 +92,7 @@ export default function SelectMilestoneAlignment() {
         .upsert({
           user_id: user.id,
           milestone_days: parseInt(milestone),
-          alignment_id: selectedId,
+          alignment_id: alignmentId,
         }, {
           onConflict: 'user_id,milestone_days'
         });
@@ -68,14 +101,11 @@ export default function SelectMilestoneAlignment() {
 
       toast({
         title: "Featured alignment saved!",
-        description: `Your special alignment for the ${milestone}-day milestone has been set.`,
       });
-
-      navigate("/achievements");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error saving selection",
+        title: "Error",
         description: error.message,
       });
     } finally {
@@ -121,7 +151,7 @@ export default function SelectMilestoneAlignment() {
                   ? 'border-primary bg-primary/5'
                   : 'hover:border-primary/50'
               }`}
-              onClick={() => setSelectedId(alignment.id)}
+              onClick={() => handleSelect(alignment.id)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -153,13 +183,9 @@ export default function SelectMilestoneAlignment() {
           ))}
         </div>
 
-        <Button
-          onClick={handleSave}
-          disabled={!selectedId || saving}
-          className="w-full"
-        >
-          {saving ? "Saving..." : "Save Featured Alignment"}
-        </Button>
+        {saving && (
+          <p className="text-center text-sm text-muted-foreground">Saving...</p>
+        )}
       </div>
     </div>
   );
