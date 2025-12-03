@@ -134,7 +134,7 @@ export default function PersonalMission() {
         <div className="space-y-6 max-w-5xl mx-auto">
           <div className="space-y-4">
             <p className="text-muted-foreground text-center">
-              Edit your personal mission or retake the questions to generate a new one
+              Your personal mission serves as your guiding compass for creating meaningful daily alignments.
             </p>
             <div className="space-y-2">
               <Label htmlFor="mission" className="sr-only">Personal Mission</Label>
@@ -175,6 +175,9 @@ export default function PersonalMission() {
                 Retake Questions
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground text-center pt-2">
+              Edit your personal mission or retake the questions to generate a new one
+            </p>
           </div>
         </div>
       </div>
