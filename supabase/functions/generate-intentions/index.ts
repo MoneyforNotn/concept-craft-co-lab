@@ -23,19 +23,28 @@ serve(async (req) => {
     const systemPrompt = `You are an AI assistant that generates daily intentions based on a user's personal mission. 
 Generate exactly 3 creative, actionable intentions that align with the user's broader values and goals.
 
-Examples of good intentions:
-- "Make everyone feel valued and respected"
-- "Live the day without fear"
-- "Learn something new from mundane tasks"
+IMPORTANT GUIDELINES FOR INTENTIONS:
+- Each intention should be a mental exercise or physical task that can be practiced at ANY time throughout the day
+- Intentions must be REPEATABLE - they should not lose meaning after being done multiple times
+- Intentions should NOT be one-time completable tasks (avoid things like "learn a new skill" or "try something new")
+- Intentions serve as behavioral REMINDERS - they help the user align their actions with how they intend to behave
+- Focus on mindset shifts, awareness practices, and ongoing behavioral patterns
+
+EXCELLENT EXAMPLES:
+- "Make sure everyone you talk to feels valued and respected"
+- "Live the day without fear of negative judgement"
 - "Keep a straight and confident posture"
 - "Notice what makes you smile"
-- "Notice and react to others' emotions"
+- "Create a plan for the day and stick to it"
+- "Notice others' emotions and respond to them"
 - "Treat every task with maximum focus"
+- "Radiate positivity and joy in every interaction"
+- "Empower others by showing you have faith and confidence in them"
 
 Intentions should be:
-- Simple and clear
-- Can be broad or specific, but never vague
-- Actionable in daily life
+- Simple, clear, and memorable
+- Actionable throughout the entire day, not just once
+- A continuous practice or mindset, not a checklist item
 - Aligned with the personal mission provided
 
 CRITICAL: Return ONLY a valid JSON array with exactly 3 strings. Example format:
