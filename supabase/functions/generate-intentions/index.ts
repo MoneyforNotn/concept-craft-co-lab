@@ -20,17 +20,12 @@ serve(async (req) => {
     console.log('Generating intentions for personal mission:', personalMission);
     console.log('User feedback:', userFeedback);
 
-    const systemPrompt = `You are an AI assistant that generates daily intentions based on a user's personal mission. 
-Generate exactly 3 creative, actionable intentions that align with the user's broader values and goals.
+    const systemPrompt = `Generate exactly 3 daily intentions based on the user's personal mission.
 
-IMPORTANT GUIDELINES FOR INTENTIONS:
-- Each intention should be a mental exercise or physical task that can be practiced at ANY time throughout the day
-- Intentions must be REPEATABLE - they should not lose meaning after being done multiple times
-- Intentions should NOT be one-time completable tasks (avoid things like "learn a new skill" or "try something new")
-- Intentions serve as behavioral REMINDERS - they help the user align their actions with how they intend to behave
-- Focus on mindset shifts, awareness practices, and ongoing behavioral patterns
+WHAT IS AN INTENTION:
+An intention is a BEHAVIORAL REMINDER - a specific way of acting or thinking that can be practiced CONTINUOUSLY throughout the entire day. It reminds the user how to behave in alignment with their values.
 
-EXCELLENT EXAMPLES:
+REQUIRED STYLE - COPY THIS EXACTLY:
 - "Make sure everyone you talk to feels valued and respected"
 - "Live the day without fear of negative judgement"
 - "Keep a straight and confident posture"
@@ -41,16 +36,20 @@ EXCELLENT EXAMPLES:
 - "Radiate positivity and joy in every interaction"
 - "Empower others by showing you have faith and confidence in them"
 
-Intentions should be:
-- Simple, clear, and memorable
-- Actionable throughout the entire day, not just once
-- A continuous practice or mindset, not a checklist item
-- Aligned with the personal mission provided
+CRITICAL - DO NOT GENERATE THESE TYPES (THEY ARE WRONG):
+❌ "Embrace every challenge as an opportunity" - too abstract, not a specific behavior
+❌ "Share knowledge with someone" - one-time action, not continuous
+❌ "Learn something new today" - completable task, not ongoing practice
+❌ "Cultivate a sense of joy" - vague, not actionable
+❌ "Seek out opportunities" - not a specific behavior to practice
 
-CRITICAL: Return ONLY a valid JSON array with exactly 3 strings. Example format:
-["intention 1", "intention 2", "intention 3"]
+CORRECT INTENTIONS ARE:
+✓ Specific observable behaviors (posture, how you speak to people, focus level)
+✓ Continuous practices that apply to EVERY interaction or task
+✓ Written as direct instructions: "Keep...", "Notice...", "Treat every...", "Make sure..."
+✓ Things you can remind yourself of repeatedly throughout the day
 
-Do not include any other text, explanations, or formatting. Just the JSON array.`;
+Return ONLY a JSON array: ["intention 1", "intention 2", "intention 3"]`;
 
     let userPrompt = `Personal Mission: "${personalMission}"
 
