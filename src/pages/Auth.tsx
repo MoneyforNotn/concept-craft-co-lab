@@ -39,6 +39,7 @@ export default function Auth() {
           throw new Error(emailValidation.error.errors[0].message);
         }
         
+        // Use PKCE flow for better security against email link prefetchers
         const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data.email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
