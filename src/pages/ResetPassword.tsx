@@ -27,25 +27,56 @@ export default function ResetPassword() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
+        setCheckingSession(false);
+      } else if (event === "SIGNED_IN" && session) {
+        // User signed in via recovery link
+        setIsRecoveryMode(true);
+        setCheckingSession(false);
+      }
+    });
+
     const handlePasswordRecovery = async () => {
       try {
-        // Check for hash parameters (from email link)
+        // Check for code in URL (PKCE flow)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+          // Exchange code for session
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error && data.session) {
+            setIsRecoveryMode(true);
+            setCheckingSession(false);
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          }
+        }
+
+        // Check for hash parameters (legacy flow)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const type = hashParams.get('type');
 
         if (type === 'recovery' && accessToken) {
-          // We have a recovery token, set recovery mode
           setIsRecoveryMode(true);
           setCheckingSession(false);
           return;
         }
 
-        // If no hash params, check session
+        // Check existing session
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
+          // Check if this is a recovery session by looking at aal
           setIsRecoveryMode(true);
+          setCheckingSession(false);
+          return;
         }
+        
         setCheckingSession(false);
       } catch (error) {
         console.error('Error checking recovery status:', error);
@@ -54,14 +85,6 @@ export default function ResetPassword() {
     };
 
     handlePasswordRecovery();
-
-    // Also listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecoveryMode(true);
-        setCheckingSession(false);
-      }
-    });
 
     return () => subscription.unsubscribe();
   }, []);
