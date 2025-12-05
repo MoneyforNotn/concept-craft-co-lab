@@ -43,24 +43,57 @@ export default function ResetPassword() {
 
     const handlePasswordRecovery = async () => {
       try {
-        // Check for error parameters in hash FIRST (from failed Supabase verification)
+        const urlParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const errorCode = hashParams.get('error_code');
-        const errorDescription = hashParams.get('error_description');
         
-        if (errorCode) {
-          console.log("Error from Supabase:", errorCode, errorDescription);
-          if (errorCode === 'otp_expired') {
+        // Check for error parameters in URL query string first (Supabase redirects errors here)
+        const errorParam = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+        const errorCode = urlParams.get('error_code');
+        
+        // Also check hash for errors
+        const hashError = hashParams.get('error');
+        const hashErrorCode = hashParams.get('error_code');
+        const hashErrorDescription = hashParams.get('error_description');
+        
+        if (errorParam || hashError || errorCode || hashErrorCode) {
+          const code = errorCode || hashErrorCode;
+          const desc = errorDescription || hashErrorDescription;
+          console.log("Error from Supabase:", code, desc);
+          
+          if (code === 'otp_expired' || desc?.includes('expired')) {
             setErrorMessage("This password reset link has expired. Reset links are valid for 1 hour. Please request a new one.");
+          } else if (code === 'access_denied' || desc?.includes('invalid') || desc?.includes('not found')) {
+            setErrorMessage("This password reset link has already been used or is invalid. Each link can only be used once. Please request a new one.");
           } else {
-            setErrorMessage(errorDescription?.replace(/\+/g, ' ') || "This password reset link is invalid. Please request a new one.");
+            setErrorMessage(desc?.replace(/\+/g, ' ')?.replace(/%20/g, ' ') || "This password reset link is invalid. Please request a new one.");
           }
           setCheckingSession(false);
           return;
         }
 
-        // Check for token_hash in URL (email link verification)
-        const urlParams = new URLSearchParams(window.location.search);
+        // Check for code in URL (PKCE flow - this is the main flow Supabase uses)
+        const code = urlParams.get('code');
+        
+        if (code) {
+          console.log("Exchanging code for session...");
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error && data.session) {
+            console.log("Code exchanged successfully");
+            setIsRecoveryMode(true);
+            setCheckingSession(false);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          } else {
+            console.log("Code exchange failed:", error?.message);
+            // The code was already used or is invalid
+            setErrorMessage("This password reset link has already been used or is invalid. Each link can only be used once. Please request a new one.");
+            setCheckingSession(false);
+            return;
+          }
+        }
+
+        // Check for token_hash in URL (email link verification - alternative flow)
         const tokenHash = urlParams.get('token_hash');
         const type = urlParams.get('type');
         
@@ -78,27 +111,10 @@ export default function ResetPassword() {
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } else {
-            console.log("Token verification failed:", error);
-            setErrorMessage("This password reset link is invalid or has expired. Please request a new one.");
+            console.log("Token verification failed:", error?.message);
+            setErrorMessage("This password reset link has already been used or is invalid. Please request a new one.");
             setCheckingSession(false);
             return;
-          }
-        }
-
-        // Check for code in URL (PKCE flow)
-        const code = urlParams.get('code');
-        
-        if (code) {
-          console.log("Exchanging code for session...");
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (!error && data.session) {
-            console.log("Code exchanged successfully");
-            setIsRecoveryMode(true);
-            setCheckingSession(false);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            return;
-          } else {
-            console.log("Code exchange failed:", error);
           }
         }
 
@@ -113,7 +129,7 @@ export default function ResetPassword() {
           return;
         }
 
-        // Check existing session
+        // Check existing session - user might already be in recovery mode
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Existing session check:", !!session);
         if (session) {
@@ -122,6 +138,7 @@ export default function ResetPassword() {
           return;
         }
         
+        // No valid recovery parameters found and no session
         setCheckingSession(false);
       } catch (error) {
         console.error('Error checking recovery status:', error);
@@ -192,16 +209,22 @@ export default function ResetPassword() {
               {errorMessage || "This password reset link is invalid or has expired. Please request a new one."}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             <Button 
               onClick={() => navigate("/auth")} 
               className="w-full"
             >
-              Back to Login
+              Request New Reset Link
             </Button>
-            <p className="text-sm text-muted-foreground text-center">
-              Click "Forgot password?" on the login page to receive a new reset link.
-            </p>
+            <div className="text-sm text-muted-foreground space-y-2 bg-muted/50 p-3 rounded-lg">
+              <p className="font-medium">Tips for password reset:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>Click the reset link within a few minutes of receiving it</li>
+                <li>Each link can only be used once</li>
+                <li>Don't click the link multiple times</li>
+                <li>Some email security tools may click links - try requesting a new one</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>
