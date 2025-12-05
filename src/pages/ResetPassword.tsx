@@ -23,12 +23,14 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event, "Session:", !!session);
       if (event === "PASSWORD_RECOVERY") {
         setIsRecoveryMode(true);
         setCheckingSession(false);
@@ -41,28 +43,71 @@ export default function ResetPassword() {
 
     const handlePasswordRecovery = async () => {
       try {
-        // Check for code in URL (PKCE flow)
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+        // Check for error parameters in hash FIRST (from failed Supabase verification)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const errorCode = hashParams.get('error_code');
+        const errorDescription = hashParams.get('error_description');
         
-        if (code) {
-          // Exchange code for session
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (errorCode) {
+          console.log("Error from Supabase:", errorCode, errorDescription);
+          if (errorCode === 'otp_expired') {
+            setErrorMessage("This password reset link has expired. Reset links are valid for 1 hour. Please request a new one.");
+          } else {
+            setErrorMessage(errorDescription?.replace(/\+/g, ' ') || "This password reset link is invalid. Please request a new one.");
+          }
+          setCheckingSession(false);
+          return;
+        }
+
+        // Check for token_hash in URL (email link verification)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenHash = urlParams.get('token_hash');
+        const type = urlParams.get('type');
+        
+        if (tokenHash && type === 'recovery') {
+          console.log("Verifying token_hash...");
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery',
+          });
+          
           if (!error && data.session) {
+            console.log("Token verified successfully");
             setIsRecoveryMode(true);
             setCheckingSession(false);
-            // Clean up URL
             window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          } else {
+            console.log("Token verification failed:", error);
+            setErrorMessage("This password reset link is invalid or has expired. Please request a new one.");
+            setCheckingSession(false);
             return;
           }
         }
 
-        // Check for hash parameters (legacy flow)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const type = hashParams.get('type');
+        // Check for code in URL (PKCE flow)
+        const code = urlParams.get('code');
+        
+        if (code) {
+          console.log("Exchanging code for session...");
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error && data.session) {
+            console.log("Code exchanged successfully");
+            setIsRecoveryMode(true);
+            setCheckingSession(false);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          } else {
+            console.log("Code exchange failed:", error);
+          }
+        }
 
-        if (type === 'recovery' && accessToken) {
+        // Check for hash parameters (legacy implicit flow)
+        const accessToken = hashParams.get('access_token');
+        const hashType = hashParams.get('type');
+
+        if (hashType === 'recovery' && accessToken) {
+          console.log("Found recovery token in hash");
           setIsRecoveryMode(true);
           setCheckingSession(false);
           return;
@@ -70,8 +115,8 @@ export default function ResetPassword() {
 
         // Check existing session
         const { data: { session } } = await supabase.auth.getSession();
+        console.log("Existing session check:", !!session);
         if (session) {
-          // Check if this is a recovery session by looking at aal
           setIsRecoveryMode(true);
           setCheckingSession(false);
           return;
@@ -143,17 +188,20 @@ export default function ResetPassword() {
             <CardTitle className="text-2xl font-bold text-destructive">
               Invalid Reset Link
             </CardTitle>
-            <CardDescription>
-              This password reset link is invalid or has expired. Please request a new one.
+            <CardDescription className="text-base">
+              {errorMessage || "This password reset link is invalid or has expired. Please request a new one."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <Button 
               onClick={() => navigate("/auth")} 
               className="w-full"
             >
               Back to Login
             </Button>
+            <p className="text-sm text-muted-foreground text-center">
+              Click "Forgot password?" on the login page to receive a new reset link.
+            </p>
           </CardContent>
         </Card>
       </div>
