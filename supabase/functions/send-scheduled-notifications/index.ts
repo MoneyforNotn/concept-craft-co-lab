@@ -58,6 +58,17 @@ const getMessageForTime = (hour: number): string => {
   return notificationMessages[Math.floor(Math.random() * notificationMessages.length)];
 };
 
+// Calculate second notification time (8 hours after first)
+const calculateSecondNotificationTime = (firstTime: string): string => {
+  const [hours, minutes] = firstTime.split(':').map(Number);
+  let secondHours = hours + 8;
+  // Handle day wrap (if second notification is next day, it won't match today)
+  if (secondHours >= 24) {
+    secondHours -= 24;
+  }
+  return `${String(secondHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -113,42 +124,55 @@ const handler = async (req: Request): Promise<Response> => {
       let shouldSendNotification = false;
       let isSecondNotification = false;
 
-      // Get user's last notification today
+      // Get today's date boundaries
       const todayStart = new Date();
       todayStart.setUTCHours(0, 0, 0, 0);
       
-      const { data: lastNotificationToday, error: logError } = await supabase
+      // Get all notifications sent today for this user
+      const { data: todayNotifications, error: logError } = await supabase
         .from('notification_logs')
-        .select('sent_at')
+        .select('sent_at, message')
         .eq('user_id', setting.user_id)
         .eq('status', 'success')
         .gte('sent_at', todayStart.toISOString())
-        .order('sent_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('sent_at', { ascending: true });
 
-      if (logError && logError.code !== 'PGRST116') {
-        console.error(`Error fetching notification log for user ${setting.user_id}:`, logError);
+      if (logError) {
+        console.error(`Error fetching notification logs for user ${setting.user_id}:`, logError);
       }
 
-      // Check if any of the scheduled times match current time (first notification)
+      const notificationCountToday = todayNotifications?.length || 0;
+      console.log(`User ${setting.user_id}: ${notificationCountToday} notifications sent today`);
+
+      // Get the first scheduled time (for calculating second notification)
+      const firstScheduledTime = scheduledTimes.length > 0 ? scheduledTimes[0] : null;
+      const secondNotificationTime = firstScheduledTime ? calculateSecondNotificationTime(firstScheduledTime) : null;
+
+      console.log(`User ${setting.user_id}: First scheduled time: ${firstScheduledTime}, Second notification time: ${secondNotificationTime}`);
+
+      // Check if current time matches first scheduled time
       if (scheduledTimes.includes(currentTime)) {
-        // Only send if no notification sent today yet
-        if (!lastNotificationToday) {
+        // Only send first notification if no notifications sent today yet
+        if (notificationCountToday === 0) {
           shouldSendNotification = true;
           isSecondNotification = false;
-          console.log(`First notification scheduled for user ${setting.user_id}`);
+          console.log(`First notification triggered for user ${setting.user_id} at ${currentTime}`);
+        } else {
+          console.log(`Skipping first notification for user ${setting.user_id} - already sent ${notificationCountToday} today`);
         }
-      } else if (lastNotificationToday) {
-        // Check if 8 hours have passed since last notification (second notification)
-        const lastNotificationTime = new Date(lastNotificationToday.sent_at);
-        const hoursSinceLastNotification = (now.getTime() - lastNotificationTime.getTime()) / (1000 * 60 * 60);
-        
-        // Send second notification if 8+ hours have passed and we're within the same minute
-        if (hoursSinceLastNotification >= 8 && hoursSinceLastNotification < 8.017) {
+      }
+      
+      // Check if current time matches second notification time (8 hours after first)
+      if (secondNotificationTime && currentTime === secondNotificationTime) {
+        // Only send second notification if exactly 1 notification was sent today
+        if (notificationCountToday === 1) {
           shouldSendNotification = true;
           isSecondNotification = true;
-          console.log(`Second notification (8 hours later) scheduled for user ${setting.user_id}`);
+          console.log(`Second notification triggered for user ${setting.user_id} at ${currentTime} (8 hours after ${firstScheduledTime})`);
+        } else if (notificationCountToday >= 2) {
+          console.log(`Skipping second notification for user ${setting.user_id} - already sent ${notificationCountToday} today`);
+        } else {
+          console.log(`Skipping second notification for user ${setting.user_id} - first notification not sent yet`);
         }
       }
 
@@ -194,7 +218,7 @@ const handler = async (req: Request): Promise<Response> => {
           body: JSON.stringify({
             app_id: ONESIGNAL_APP_ID,
             include_player_ids: [notification.playerId],
-            headings: { en: 'Daily Alignment Reminder' },
+            headings: { en: notification.isSecondNotification ? 'Evening Alignment Check' : 'Daily Alignment Reminder' },
             contents: { en: message },
             ios_badgeType: 'Increase',
             ios_badgeCount: 1,
@@ -204,7 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
         const data = await response.json();
         
         if (response.ok) {
-          console.log(`Notification sent to user ${notification.userId}`);
+          console.log(`Notification sent to user ${notification.userId} (second: ${notification.isSecondNotification})`);
           
           // Log successful notification
           await supabase
@@ -216,7 +240,7 @@ const handler = async (req: Request): Promise<Response> => {
               status: 'success',
             });
           
-          results.push({ userId: notification.userId, success: true });
+          results.push({ userId: notification.userId, success: true, isSecond: notification.isSecondNotification });
         } else {
           console.error(`Failed to send notification to user ${notification.userId}:`, data);
           
