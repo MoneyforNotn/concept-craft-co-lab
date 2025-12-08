@@ -192,7 +192,6 @@ export default function CreateAlignment() {
                   id="intention"
                   value={intention}
                   onChange={(e) => setIntention(e.target.value)}
-                  placeholder="Enter your intention..."
                   required
                   disabled={loading}
                 />
@@ -205,14 +204,13 @@ export default function CreateAlignment() {
                   id="emotion"
                   value={emotion}
                   onChange={(e) => setEmotion(e.target.value)}
-                  placeholder="Enter your emotion..."
                   required
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="checklist" className="text-base font-semibold">Daily Checklist</Label>
+                <Label htmlFor="checklist" className="text-base font-semibold italic">Daily Checklist</Label>
                 <Textarea
                   id="checklist"
                   value={checklist}
