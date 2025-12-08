@@ -187,11 +187,12 @@ export default function CreateAlignment() {
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="intention" className="text-base font-semibold">Intention</Label>
+                <p className="text-sm text-muted-foreground">What do I want to manifest today?</p>
                 <Input
                   id="intention"
                   value={intention}
                   onChange={(e) => setIntention(e.target.value)}
-                  placeholder="What do I want to manifest today?"
+                  placeholder="Enter your intention..."
                   required
                   disabled={loading}
                 />
@@ -199,11 +200,12 @@ export default function CreateAlignment() {
 
               <div className="space-y-2">
                 <Label htmlFor="emotion" className="text-base font-semibold">Emotion</Label>
+                <p className="text-sm text-muted-foreground">With what energy do I embody this?</p>
                 <Input
                   id="emotion"
                   value={emotion}
                   onChange={(e) => setEmotion(e.target.value)}
-                  placeholder="With what energy do I embody this?"
+                  placeholder="Enter your emotion..."
                   required
                   disabled={loading}
                 />
