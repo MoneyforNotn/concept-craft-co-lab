@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { User as UserType, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen, ChevronDown } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen, ChevronDown, CheckSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
@@ -268,6 +269,28 @@ export default function Dashboard() {
     if (user) loadUserData(user.id);
   };
 
+  const handleChecklistToggle = async (alignmentId: string, itemIndex: number) => {
+    const alignment = todayAlignments.find(a => a.id === alignmentId);
+    if (!alignment || !alignment.checklist_items) return;
+
+    const updatedItems = [...alignment.checklist_items];
+    updatedItems[itemIndex] = {
+      ...updatedItems[itemIndex],
+      checked: !updatedItems[itemIndex].checked
+    };
+
+    const { error } = await supabase
+      .from('daily_alignments')
+      .update({ checklist_items: updatedItems })
+      .eq('id', alignmentId);
+
+    if (!error) {
+      setTodayAlignments(prev => prev.map(a => 
+        a.id === alignmentId ? { ...a, checklist_items: updatedItems } : a
+      ));
+    }
+  };
+
   const getNextReflectionTime = (alignmentId: string): Date | undefined => {
     const alignmentReflections = reflections[alignmentId] || [];
     if (alignmentReflections.length === 0) return undefined;
@@ -475,6 +498,41 @@ export default function Dashboard() {
                 <Plus className="mr-2 h-4 w-4" />
                 Create Alignment
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Daily Checklist Card */}
+        {todayAlignments.some(a => a.checklist_items && a.checklist_items.length > 0) && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                Daily Checklist
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {todayAlignments.map(alignment => 
+                alignment.checklist_items?.map((item: { text: string; checked: boolean }, index: number) => (
+                  <div 
+                    key={`${alignment.id}-${index}`} 
+                    className="flex items-start gap-3"
+                  >
+                    <Checkbox
+                      id={`checklist-${alignment.id}-${index}`}
+                      checked={item.checked}
+                      onCheckedChange={() => handleChecklistToggle(alignment.id, index)}
+                      className="mt-0.5"
+                    />
+                    <label
+                      htmlFor={`checklist-${alignment.id}-${index}`}
+                      className={`text-sm cursor-pointer ${item.checked ? 'line-through text-muted-foreground' : ''}`}
+                    >
+                      {item.text}
+                    </label>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         )}
