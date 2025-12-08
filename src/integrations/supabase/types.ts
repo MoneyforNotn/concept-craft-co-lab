@@ -80,6 +80,7 @@ export type Database = {
       }
       daily_alignments: {
         Row: {
+          checklist_items: Json | null
           created_at: string | null
           date: string
           emotion: string
@@ -91,6 +92,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          checklist_items?: Json | null
           created_at?: string | null
           date: string
           emotion: string
@@ -102,6 +104,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          checklist_items?: Json | null
           created_at?: string | null
           date?: string
           emotion?: string

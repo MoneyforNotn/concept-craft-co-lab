@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -19,10 +20,43 @@ const alignmentSchema = z.object({
 export default function CreateAlignment() {
   const [intention, setIntention] = useState("");
   const [emotion, setEmotion] = useState("");
+  const [checklist, setChecklist] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { cancelAllNotifications } = useNotifications();
+
+  const handleChecklistChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const lines = value.split('\n');
+    const formattedLines = lines.map((line, index) => {
+      // If it's a new line (empty or just starting to type) and not the first line
+      if (line === '' && index > 0) return '';
+      // If the line doesn't start with "- ", add it
+      if (!line.startsWith('- ') && line.trim() !== '') {
+        return `- ${line.replace(/^-\s*/, '')}`;
+      }
+      return line;
+    });
+    setChecklist(formattedLines.join('\n'));
+  };
+
+  const handleChecklistKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setChecklist(prev => prev + '\n- ');
+    }
+  };
+
+  const parseChecklistItems = (text: string) => {
+    if (!text.trim()) return null;
+    const lines = text.split('\n').filter(line => line.trim() !== '' && line.trim() !== '-');
+    if (lines.length === 0) return null;
+    return lines.map(line => ({
+      text: line.replace(/^-\s*/, '').trim(),
+      checked: false
+    }));
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +95,8 @@ export default function CreateAlignment() {
         console.log('Cancelled previous alignment notifications');
       }
 
+      const checklistItems = parseChecklistItems(checklist);
+      
       const { error } = await supabase
         .from('daily_alignments')
         .insert({
@@ -68,6 +104,7 @@ export default function CreateAlignment() {
           date: today,
           intention: validation.data.intention,
           emotion: validation.data.emotion,
+          checklist_items: checklistItems,
         });
 
       if (error) throw error;
@@ -145,39 +182,46 @@ export default function CreateAlignment() {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Create Alignment</CardTitle>
-            <CardDescription>
-              Set your intention and emotion to guide your day (up to 2 per day)
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="intention">Intention</Label>
+                <Label htmlFor="intention" className="text-base font-semibold">Intention</Label>
                 <Input
                   id="intention"
                   value={intention}
                   onChange={(e) => setIntention(e.target.value)}
-                  placeholder=""
+                  placeholder="What do I want to manifest today?"
                   required
                   disabled={loading}
                 />
-                <p className="text-sm text-muted-foreground">
-                  What do I want to manifest with my action & interactions today?
-                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="emotion">Emotion</Label>
+                <Label htmlFor="emotion" className="text-base font-semibold">Emotion</Label>
                 <Input
                   id="emotion"
                   value={emotion}
                   onChange={(e) => setEmotion(e.target.value)}
-                  placeholder=""
+                  placeholder="With what energy do I embody this?"
                   required
                   disabled={loading}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="checklist" className="text-base font-semibold">Daily Checklist</Label>
+                <Textarea
+                  id="checklist"
+                  value={checklist}
+                  onChange={handleChecklistChange}
+                  onKeyDown={handleChecklistKeyDown}
+                  placeholder="- Add items you want to accomplish today"
+                  disabled={loading}
+                  className="min-h-[100px] resize-none"
+                />
                 <p className="text-sm text-muted-foreground">
-                  With what energy do I want to embody this intention?
+                  Optional: Add tasks you want to complete today
                 </p>
               </div>
 
