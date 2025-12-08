@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X, Trash2 } from "lucide-react";
 import ReflectionForm from "@/components/ReflectionForm";
@@ -393,6 +394,40 @@ export default function AlignmentDetail() {
             )}
           </CardContent>
         </Card>
+
+        {/* Daily Checklist */}
+        {alignment.checklist_items && Array.isArray(alignment.checklist_items) && alignment.checklist_items.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Daily Checklist</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {alignment.checklist_items.map((item: { text: string; checked: boolean }, index: number) => (
+                <div key={index} className="flex items-center gap-3">
+                  <Checkbox
+                    checked={item.checked}
+                    onCheckedChange={async (checked) => {
+                      const updatedItems = [...alignment.checklist_items];
+                      updatedItems[index] = { ...item, checked: !!checked };
+                      
+                      const { error } = await supabase
+                        .from('daily_alignments')
+                        .update({ checklist_items: updatedItems })
+                        .eq('id', id);
+                      
+                      if (!error) {
+                        setAlignment({ ...alignment, checklist_items: updatedItems });
+                      }
+                    }}
+                  />
+                  <span className={item.checked ? "line-through text-muted-foreground" : ""}>
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Reflection Form */}
         <div className="mb-6">
