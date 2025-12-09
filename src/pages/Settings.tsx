@@ -16,6 +16,22 @@ import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
+const HelpTooltip = ({ content }: { content: string }) => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <span 
+        className="inline-flex items-center justify-center cursor-pointer outline-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+      </span>
+    </PopoverTrigger>
+    <PopoverContent side="top" className="max-w-[250px] text-sm p-3 w-auto">
+      {content}
+    </PopoverContent>
+  </Popover>
+);
+
 const timezoneSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
 });
@@ -190,19 +206,6 @@ export default function Settings() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
-
-  const HelpTooltip = ({ content }: { content: string }) => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button type="button" className="inline-flex items-center justify-center">
-          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent side="top" className="max-w-[250px] text-sm">
-        {content}
-      </PopoverContent>
-    </Popover>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
