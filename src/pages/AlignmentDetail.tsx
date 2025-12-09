@@ -38,6 +38,7 @@ export default function AlignmentDetail() {
   const [canAddReflection, setCanAddReflection] = useState(true);
   const [showBackButton, setShowBackButton] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [newChecklistItem, setNewChecklistItem] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -396,38 +397,87 @@ export default function AlignmentDetail() {
         </Card>
 
         {/* Daily Checklist */}
-        {alignment.checklist_items && Array.isArray(alignment.checklist_items) && alignment.checklist_items.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Daily Checklist</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {alignment.checklist_items.map((item: { text: string; checked: boolean }, index: number) => (
-                <div key={index} className="flex items-center gap-3">
-                  <Checkbox
-                    checked={item.checked}
-                    onCheckedChange={async (checked) => {
-                      const updatedItems = [...alignment.checklist_items];
-                      updatedItems[index] = { ...item, checked: !!checked };
-                      
-                      const { error } = await supabase
-                        .from('daily_alignments')
-                        .update({ checklist_items: updatedItems })
-                        .eq('id', id);
-                      
-                      if (!error) {
-                        setAlignment({ ...alignment, checklist_items: updatedItems });
-                      }
-                    }}
-                  />
-                  <span className={item.checked ? "line-through text-muted-foreground" : ""}>
-                    {item.text}
-                  </span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg italic">Daily Checklist</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {alignment.checklist_items && Array.isArray(alignment.checklist_items) && alignment.checklist_items.length > 0 && (
+              <>
+                {alignment.checklist_items.map((item: { text: string; checked: boolean }, index: number) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={async (checked) => {
+                        const updatedItems = [...alignment.checklist_items];
+                        updatedItems[index] = { ...item, checked: !!checked };
+                        
+                        const { error } = await supabase
+                          .from('daily_alignments')
+                          .update({ checklist_items: updatedItems })
+                          .eq('id', id);
+                        
+                        if (!error) {
+                          setAlignment({ ...alignment, checklist_items: updatedItems });
+                        }
+                      }}
+                    />
+                    <span className={item.checked ? "line-through text-muted-foreground" : ""}>
+                      {item.text}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+            <div className="flex items-center gap-2 pt-2">
+              <Input
+                value={newChecklistItem}
+                onChange={(e) => setNewChecklistItem(e.target.value)}
+                placeholder="Add new item..."
+                onKeyDown={async (e) => {
+                  if (e.key === 'Enter' && newChecklistItem.trim()) {
+                    e.preventDefault();
+                    const currentItems = alignment.checklist_items || [];
+                    const updatedItems = [...currentItems, { text: newChecklistItem.trim(), checked: false }];
+                    
+                    const { error } = await supabase
+                      .from('daily_alignments')
+                      .update({ checklist_items: updatedItems })
+                      .eq('id', id);
+                    
+                    if (!error) {
+                      setAlignment({ ...alignment, checklist_items: updatedItems });
+                      setNewChecklistItem("");
+                    }
+                  }
+                }}
+              />
+              <Button
+                size="icon"
+                variant="outline"
+                disabled={!newChecklistItem.trim()}
+                onClick={async () => {
+                  if (newChecklistItem.trim()) {
+                    const currentItems = alignment.checklist_items || [];
+                    const updatedItems = [...currentItems, { text: newChecklistItem.trim(), checked: false }];
+                    
+                    const { error } = await supabase
+                      .from('daily_alignments')
+                      .update({ checklist_items: updatedItems })
+                      .eq('id', id);
+                    
+                    if (!error) {
+                      setAlignment({ ...alignment, checklist_items: updatedItems });
+                      setNewChecklistItem("");
+                    }
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Reflection Form */}
         <div className="mb-6">
