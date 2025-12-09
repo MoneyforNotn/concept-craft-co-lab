@@ -192,20 +192,22 @@ export default function Settings() {
   }, [lastScrollY]);
 
   const HelpTooltip = ({ content }: { content: string }) => (
-    <Tooltip>
+    <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
-        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help ml-2" />
+        <button type="button" className="inline-flex items-center justify-center">
+          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+        </button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[250px]">
+      <TooltipContent side="top" className="max-w-[250px] z-50">
         <p className="text-sm">{content}</p>
       </TooltipContent>
     </Tooltip>
   );
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
-        <div className="container max-w-3xl mx-auto py-8">
+        <div className="container max-w-5xl mx-auto py-8">
           <div className="pt-4">
             <Button
               variant="ghost"
@@ -238,9 +240,9 @@ export default function Settings() {
               <CardContent className="py-6 space-y-6">
                 {/* Automated Notifications */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Label htmlFor="notifications-toggle" className="font-medium">Automated Notifications</Label>
+                  <div className="flex items-center gap-2">
                     <HelpTooltip content="Receive automated notifications at scheduled times throughout the day to remind you of your daily intention and emotion." />
+                    <Label htmlFor="notifications-toggle" className="font-medium">Automated Notifications</Label>
                   </div>
                   <Switch
                     id="notifications-toggle"
@@ -254,9 +256,9 @@ export default function Settings() {
                 {isInitialized && playerId && (
                   <>
                     <div className="border-t pt-6">
-                      <div className="flex items-center mb-3">
-                        <Label className="font-medium">Test Push Notification</Label>
+                      <div className="flex items-center gap-2 mb-3">
                         <HelpTooltip content="Auto-timers that send test notifications to your device at random intervals." />
+                        <Label className="font-medium">Test Push Notification</Label>
                       </div>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -298,9 +300,9 @@ export default function Settings() {
                 {/* Display Preferences */}
                 <div className="border-t pt-6 space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Label htmlFor="show-quotes">Inspirational Quotes</Label>
+                    <div className="flex items-center gap-2">
                       <HelpTooltip content="Show inspirational quotes on the dashboard to motivate and inspire you." />
+                      <Label htmlFor="show-quotes">Inspirational Quotes</Label>
                     </div>
                     <Switch
                       id="show-quotes"
@@ -334,9 +336,9 @@ export default function Settings() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Label htmlFor="hide-streak">Hide Streak & Milestone Progress</Label>
+                    <div className="flex items-center gap-2">
                       <HelpTooltip content="Hide the streak counter and milestone progress from the dashboard." />
+                      <Label htmlFor="hide-streak">Hide Streak & Milestone Progress</Label>
                     </div>
                     <Switch
                       id="hide-streak"
@@ -370,9 +372,9 @@ export default function Settings() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Label htmlFor="hide-heatmap">Hide Activity Calendar</Label>
+                    <div className="flex items-center gap-2">
                       <HelpTooltip content="Hide the activity calendar heatmap from the dashboard." />
+                      <Label htmlFor="hide-heatmap">Hide Activity Calendar</Label>
                     </div>
                     <Switch
                       id="hide-heatmap"
@@ -408,9 +410,9 @@ export default function Settings() {
 
                 {/* Appearance */}
                 <div className="border-t pt-6">
-                  <div className="flex items-center mb-3">
-                    <Label className="font-medium">Appearance</Label>
+                  <div className="flex items-center gap-2 mb-3">
                     <HelpTooltip content="Choose between light and dark theme for the app." />
+                    <Label className="font-medium">Appearance</Label>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
