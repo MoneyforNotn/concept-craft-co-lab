@@ -14,7 +14,7 @@ import { ArrowLeft, Loader2, Clock, Moon, Sun, ChevronRight, HelpCircle } from "
 import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const timezoneSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
@@ -192,21 +192,20 @@ export default function Settings() {
   }, [lastScrollY]);
 
   const HelpTooltip = ({ content }: { content: string }) => (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <button type="button" className="inline-flex items-center justify-center">
-          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
         </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[250px] z-50">
-        <p className="text-sm">{content}</p>
-      </TooltipContent>
-    </Tooltip>
+      </PopoverTrigger>
+      <PopoverContent side="top" className="max-w-[250px] text-sm">
+        {content}
+      </PopoverContent>
+    </Popover>
   );
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
         <div className="container max-w-5xl mx-auto py-8">
           <div className="pt-4">
             <Button
@@ -494,6 +493,5 @@ export default function Settings() {
           </div>
         </div>
       </div>
-    </TooltipProvider>
   );
 }
