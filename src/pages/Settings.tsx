@@ -209,7 +209,7 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
-        <div className="container max-w-5xl mx-auto py-8">
+        <div className="w-full py-8">
           <div className="pt-4">
             <Button
               variant="ghost"
