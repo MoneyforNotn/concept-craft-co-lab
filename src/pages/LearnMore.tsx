@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Book, Youtube, Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
 export default function LearnMore() {
   const [showBackButton, setShowBackButton] = useState(true);
@@ -62,91 +62,11 @@ export default function LearnMore() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Book className="h-5 w-5" />
-              Recommended Books
-            </CardTitle>
-            <CardDescription>
-              Books on presence and meditation to deepen your practice
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Book Title Placeholder 1</p>
-                  <p className="text-sm text-muted-foreground">Author Name - Brief description</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Book Title Placeholder 2</p>
-                  <p className="text-sm text-muted-foreground">Author Name - Brief description</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Book Title Placeholder 3</p>
-                  <p className="text-sm text-muted-foreground">Author Name - Brief description</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Book Title Placeholder 4</p>
-                  <p className="text-sm text-muted-foreground">Author Name - Brief description</p>
-                </div>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Youtube className="h-5 w-5" />
-              YouTube Channels
-            </CardTitle>
-            <CardDescription>
-              Channels featuring guided meditations and mindfulness content
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Channel Name Placeholder 1</p>
-                  <p className="text-sm text-muted-foreground">Brief description of channel content</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Channel Name Placeholder 2</p>
-                  <p className="text-sm text-muted-foreground">Brief description of channel content</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Channel Name Placeholder 3</p>
-                  <p className="text-sm text-muted-foreground">Brief description of channel content</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary font-medium">•</span>
-                <div>
-                  <p className="font-medium">Channel Name Placeholder 4</p>
-                  <p className="text-sm text-muted-foreground">Brief description of channel content</p>
-                </div>
-              </li>
-            </ul>
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">
+              Resource Library is in progress and will be added soon.
+            </p>
           </CardContent>
         </Card>
 
