@@ -1,13 +1,16 @@
 project_id = "xhnwedejrifeccvtiefs"
 
 [functions.send-push-notification]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-scheduled-notifications]
 verify_jwt = false
 
 [functions.send-scheduled-test-notification]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-intentions]
-verify_jwt = false
+verify_jwt = true
+
+[functions.generate-personal-mission]
+verify_jwt = true

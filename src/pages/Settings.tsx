@@ -15,6 +15,7 @@ import { getCurrentDateTime, commonTimezones } from "@/lib/timezoneUtils";
 import { useTheme } from "@/components/theme-provider";
 import { z } from "zod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { User, Session } from "@supabase/supabase-js";
 
 const HelpTooltip = ({ content }: { content: string }) => (
   <Popover>
@@ -42,6 +43,9 @@ const notificationSchema = z.object({
 });
 
 export default function Settings() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [savingTimezone, setSavingTimezone] = useState(false);
   const [timezone, setTimezone] = useState("local");
@@ -63,8 +67,37 @@ export default function Settings() {
   const { timer1, timer2 } = useTestNotification();
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setAuthLoading(false);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadSettings();
+    }
+  }, [user]);
 
   useEffect(() => {
     const updateDateTime = () => {
@@ -77,9 +110,16 @@ export default function Settings() {
     return () => clearInterval(interval);
   }, [timezone]);
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const loadSettings = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data: profileData } = await supabase

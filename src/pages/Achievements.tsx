@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trophy, Lock, Star, Award, Medal, Crown, Sparkles as SparklesIcon, Gem, Zap, Target } from "lucide-react";
+import { ArrowLeft, Trophy, Lock, Star, Award, Medal, Crown, Sparkles as SparklesIcon, Gem, Zap, Target, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import confetti from 'canvas-confetti';
+import { User, Session } from "@supabase/supabase-js";
 
 interface Achievement {
   id: string;
@@ -21,9 +22,12 @@ interface Achievement {
 }
 
 export default function Achievements() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [totalDays, setTotalDays] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [showBackButton, setShowBackButton] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
@@ -32,8 +36,37 @@ export default function Achievements() {
   const milestones = [5, 10, 20, 40, 80, 160, 365];
 
   useEffect(() => {
-    loadAchievements();
-  }, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setAuthLoading(false);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadAchievements();
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,7 +108,6 @@ export default function Achievements() {
 
   const loadAchievements = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // Get total unique days
@@ -280,10 +312,10 @@ export default function Achievements() {
   const getAchievement = (milestone: number) => 
     achievements.find(a => a.milestone_days === milestone);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin">Loading...</div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

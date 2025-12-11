@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Camera as CapCamera, CameraResultType } from "@capacitor/camera";
 import { format } from "date-fns";
 import { z } from "zod";
+import { User, Session } from "@supabase/supabase-js";
 
 const alignmentEditSchema = z.object({
   intention: z.string().trim().min(1, "Intention is required").max(1000, "Intention must be less than 1000 characters"),
@@ -25,6 +26,9 @@ const alignmentEditSchema = z.object({
 
 export default function AlignmentDetail() {
   const { id } = useParams();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [alignment, setAlignment] = useState<any>(null);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
@@ -43,8 +47,37 @@ export default function AlignmentDetail() {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadAlignment();
-  }, [id]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setAuthLoading(false);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user && id) {
+      loadAlignment();
+    }
+  }, [id, user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -273,7 +306,7 @@ export default function AlignmentDetail() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
