@@ -210,7 +210,7 @@ export default function CreateAlignment() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="checklist" className="text-base font-semibold italic">Daily Checklist</Label>
+                <Label htmlFor="checklist" className="text-base font-semibold italic">Daily Checklist (optional)</Label>
                 <Textarea
                   id="checklist"
                   value={checklist}
@@ -220,9 +220,6 @@ export default function CreateAlignment() {
                   disabled={loading}
                   className="min-h-[100px] resize-none"
                 />
-                <p className="text-sm text-muted-foreground">
-                  Optional: Add tasks you want to complete today
-                </p>
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
