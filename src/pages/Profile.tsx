@@ -256,7 +256,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <Trophy className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-2">Unlocked Milestones</p>
+                    <p className="text-sm text-muted-foreground mb-2">Achievements</p>
                     <div className="flex flex-wrap gap-2">
                       {achievements.map((achievement) => {
                         const iconInfo = getUnlockedMilestoneIcon(achievement.milestone_days);
