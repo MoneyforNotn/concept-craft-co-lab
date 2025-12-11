@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Camera, Bookmark, Loader2, Plus, Bell, Edit2, Save, X, Trash2, Minus } from "lucide-react";
 import ReflectionForm from "@/components/ReflectionForm";
 import StarRating from "@/components/StarRating";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -439,6 +439,23 @@ export default function AlignmentDetail() {
               <>
                 {alignment.checklist_items.map((item: { text: string; checked: boolean }, index: number) => (
                   <div key={index} className="flex items-center gap-3">
+                    <button
+                      onClick={async () => {
+                        const updatedItems = alignment.checklist_items.filter((_: any, i: number) => i !== index);
+                        
+                        const { error } = await supabase
+                          .from('daily_alignments')
+                          .update({ checklist_items: updatedItems })
+                          .eq('id', id);
+                        
+                        if (!error) {
+                          setAlignment({ ...alignment, checklist_items: updatedItems });
+                        }
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
                     <Checkbox
                       checked={item.checked}
                       onCheckedChange={async (checked) => {
@@ -485,29 +502,6 @@ export default function AlignmentDetail() {
                   }
                 }}
               />
-              <Button
-                size="icon"
-                variant="outline"
-                disabled={!newChecklistItem.trim()}
-                onClick={async () => {
-                  if (newChecklistItem.trim()) {
-                    const currentItems = alignment.checklist_items || [];
-                    const updatedItems = [...currentItems, { text: newChecklistItem.trim(), checked: false }];
-                    
-                    const { error } = await supabase
-                      .from('daily_alignments')
-                      .update({ checklist_items: updatedItems })
-                      .eq('id', id);
-                    
-                    if (!error) {
-                      setAlignment({ ...alignment, checklist_items: updatedItems });
-                      setNewChecklistItem("");
-                    }
-                  }
-                }}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
           </CardContent>
         </Card>
