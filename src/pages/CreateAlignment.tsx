@@ -11,6 +11,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { getCurrentDate } from "@/lib/timezoneUtils";
 import { z } from "zod";
+import { User, Session } from "@supabase/supabase-js";
 
 const alignmentSchema = z.object({
   intention: z.string().trim().min(1, "Intention is required").max(500, "Intention must be less than 500 characters"),
@@ -18,6 +19,9 @@ const alignmentSchema = z.object({
 });
 
 export default function CreateAlignment() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [intention, setIntention] = useState("");
   const [emotion, setEmotion] = useState("");
   const [checklist, setChecklist] = useState("");
@@ -25,6 +29,33 @@ export default function CreateAlignment() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { cancelAllNotifications } = useNotifications();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setAuthLoading(false);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleChecklistChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -166,6 +197,14 @@ export default function CreateAlignment() {
       setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">

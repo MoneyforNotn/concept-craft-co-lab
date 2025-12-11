@@ -4,22 +4,55 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bookmark, Calendar, Filter } from "lucide-react";
+import { ArrowLeft, Bookmark, Calendar, Filter, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import StarRating from "@/components/StarRating";
+import { User, Session } from "@supabase/supabase-js";
 
 export default function History() {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [alignments, setAlignments] = useState<any[]>([]);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const [showBackButton, setShowBackButton] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadAlignments();
-  }, [showBookmarkedOnly]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setAuthLoading(false);
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadAlignments();
+    }
+  }, [showBookmarkedOnly, user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,9 +71,16 @@ export default function History() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const loadAlignments = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       let query = supabase
