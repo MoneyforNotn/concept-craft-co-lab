@@ -14,3 +14,6 @@ verify_jwt = true
 
 [functions.generate-personal-mission]
 verify_jwt = true
+
+[functions.process-test-timers]
+verify_jwt = false

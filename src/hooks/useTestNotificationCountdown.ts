@@ -1,68 +1,131 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useDespiaPush } from "@/hooks/useDespiaPush";
+
+interface TimerData {
+  id: string;
+  next_notification_at: string;
+  is_active: boolean;
+  is_paused: boolean;
+  min_seconds: number;
+  max_seconds: number;
+}
 
 export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: number) => {
-  const storageKey = `timer_${minSeconds}_${maxSeconds}`;
+  const timerKey = `timer_${minSeconds}_${maxSeconds}`;
   const [countdown, setCountdown] = useState<number>(0);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [timerId, setTimerId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { playerId, sendPushNotification } = useDespiaPush();
   const timerInitialized = useRef(false);
+  const syncInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Send test notification function
-  const sendTestNotification = useCallback(async () => {
-    if (!playerId) return;
-
+  // Sync timer state from database
+  const syncFromDatabase = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      if (!user) return null;
 
-      // Randomly select one of the alignment reminder messages
-      const messages = [
-        "Pause what you're doing for a moment",
-        "Take a deep breath and recall your intention and emotion",
-        "Notice how you're showing up in the present moment",
-        "Gently adjust your awareness and energy if needed"
-      ];
-      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      const { data: timer, error } = await supabase
+        .from('test_notification_timers')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('timer_key', timerKey)
+        .maybeSingle();
 
-      const { data, error } = await supabase.functions.invoke("send-scheduled-test-notification", {
-        body: {
-          userId: user.id,
-          playerId: playerId,
-          title: "Daily Alignment Reminder",
-          message: randomMessage,
-        },
-      });
+      if (error) {
+        console.error('Error fetching timer:', error);
+        return null;
+      }
 
-      if (error) throw error;
-
-      toast({
-        title: "Test notification sent",
-        description: "Check your device for the notification",
-      });
-    } catch (error: any) {
-      console.error("Error sending test notification:", error);
-      toast({
-        title: "Failed to send notification",
-        description: error.message,
-        variant: "destructive",
-      });
+      return timer as TimerData | null;
+    } catch (err) {
+      console.error('Error syncing timer:', err);
+      return null;
     }
-  }, [playerId, toast, sendPushNotification]);
+  }, [timerKey]);
 
-  // Save end time to localStorage whenever countdown changes
+  // Create or update timer in database
+  const upsertTimer = useCallback(async (nextNotificationAt: Date, isActive: boolean, isPausedState: boolean) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const timerData = {
+        user_id: user.id,
+        timer_key: timerKey,
+        next_notification_at: nextNotificationAt.toISOString(),
+        min_seconds: minSeconds,
+        max_seconds: maxSeconds,
+        is_active: isActive,
+        is_paused: isPausedState,
+      };
+
+      if (timerId) {
+        await supabase
+          .from('test_notification_timers')
+          .update({
+            next_notification_at: nextNotificationAt.toISOString(),
+            is_active: isActive,
+            is_paused: isPausedState,
+          })
+          .eq('id', timerId);
+      } else {
+        const { data, error } = await supabase
+          .from('test_notification_timers')
+          .upsert(timerData, { onConflict: 'user_id,timer_key' })
+          .select()
+          .single();
+
+        if (!error && data) {
+          setTimerId(data.id);
+        }
+      }
+    } catch (err) {
+      console.error('Error upserting timer:', err);
+    }
+  }, [timerKey, timerId, minSeconds, maxSeconds]);
+
+  // Initialize timer on mount
   useEffect(() => {
-    if (countdown > 0 && isCountdownActive && !isPaused) {
-      const endTime = Date.now() + countdown * 1000;
-      localStorage.setItem(storageKey, endTime.toString());
-    }
-  }, [countdown, isCountdownActive, isPaused, storageKey]);
+    if (timerInitialized.current) return;
+    timerInitialized.current = true;
 
-  // Countdown timer effect
+    const initializeTimer = async () => {
+      const timer = await syncFromDatabase();
+      
+      if (timer) {
+        setTimerId(timer.id);
+        setIsCountdownActive(timer.is_active);
+        setIsPaused(timer.is_paused);
+        
+        const remainingSeconds = Math.max(0, Math.floor((new Date(timer.next_notification_at).getTime() - Date.now()) / 1000));
+        
+        if (remainingSeconds > 0) {
+          setCountdown(remainingSeconds);
+        } else if (timer.is_active && !timer.is_paused) {
+          // Timer expired while app was closed - it will be processed by the edge function
+          // Generate new countdown for display
+          const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
+          const nextTime = new Date(Date.now() + newCountdown * 1000);
+          await upsertTimer(nextTime, true, false);
+          setCountdown(newCountdown);
+        }
+      } else {
+        // No timer exists, create one
+        const initialCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
+        const nextTime = new Date(Date.now() + initialCountdown * 1000);
+        await upsertTimer(nextTime, true, false);
+        setCountdown(initialCountdown);
+        setIsCountdownActive(true);
+      }
+    };
+
+    initializeTimer();
+  }, [syncFromDatabase, upsertTimer, minSeconds, maxSeconds]);
+
+  // Countdown timer effect (for display purposes)
   useEffect(() => {
     if (!isCountdownActive || isPaused) return;
 
@@ -72,63 +135,70 @@ export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: num
       }, 1000);
       return () => clearTimeout(timer);
     } else if (countdown === 0 && isCountdownActive) {
-      // Timer hit 0, send notification
-      sendTestNotification();
-      // Generate new random countdown and restart
+      // When timer hits 0, generate new countdown
+      // The edge function will handle sending the notification
       const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
-      const endTime = Date.now() + newCountdown * 1000;
-      localStorage.setItem(storageKey, endTime.toString());
+      const nextTime = new Date(Date.now() + newCountdown * 1000);
+      upsertTimer(nextTime, true, false);
       setCountdown(newCountdown);
     }
-  }, [countdown, isCountdownActive, isPaused, sendTestNotification, minSeconds, maxSeconds, storageKey]);
+  }, [countdown, isCountdownActive, isPaused, minSeconds, maxSeconds, upsertTimer]);
 
-  // Initialize countdown on mount - restore from localStorage or create new
+  // Periodic sync with database (every 30 seconds) to stay in sync
   useEffect(() => {
-    if (timerInitialized.current) return;
-    timerInitialized.current = true;
-
-    const storedEndTime = localStorage.getItem(storageKey);
-    
-    if (storedEndTime) {
-      const endTime = parseInt(storedEndTime);
-      const now = Date.now();
-      const remainingSeconds = Math.floor((endTime - now) / 1000);
+    syncInterval.current = setInterval(async () => {
+      if (!isCountdownActive || isPaused) return;
       
-      if (remainingSeconds > 0) {
-        // Timer still active, resume countdown
-        setCountdown(remainingSeconds);
-        setIsCountdownActive(true);
-      } else {
-        // Timer expired, start new one
-        const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
-        const newEndTime = Date.now() + newCountdown * 1000;
-        localStorage.setItem(storageKey, newEndTime.toString());
-        setCountdown(newCountdown);
-        setIsCountdownActive(true);
+      const timer = await syncFromDatabase();
+      if (timer && timer.is_active && !timer.is_paused) {
+        const remainingSeconds = Math.max(0, Math.floor((new Date(timer.next_notification_at).getTime() - Date.now()) / 1000));
+        if (Math.abs(remainingSeconds - countdown) > 5) {
+          // Significant drift, sync with database
+          setCountdown(remainingSeconds);
+        }
       }
+    }, 30000);
+
+    return () => {
+      if (syncInterval.current) {
+        clearInterval(syncInterval.current);
+      }
+    };
+  }, [syncFromDatabase, isCountdownActive, isPaused, countdown]);
+
+  const togglePause = useCallback(async () => {
+    const newPaused = !isPaused;
+    setIsPaused(newPaused);
+    
+    if (newPaused) {
+      // Pausing - store current countdown in database
+      const nextTime = new Date(Date.now() + countdown * 1000);
+      await upsertTimer(nextTime, isCountdownActive, true);
     } else {
-      // No stored timer, create new one
-      const initialCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
-      const endTime = Date.now() + initialCountdown * 1000;
-      localStorage.setItem(storageKey, endTime.toString());
-      setCountdown(initialCountdown);
-      setIsCountdownActive(true);
+      // Resuming - recalculate next notification time
+      const nextTime = new Date(Date.now() + countdown * 1000);
+      await upsertTimer(nextTime, isCountdownActive, false);
     }
-  }, [minSeconds, maxSeconds, storageKey]);
+  }, [isPaused, countdown, isCountdownActive, upsertTimer]);
 
-  const togglePause = useCallback(() => {
-    setIsPaused(prev => !prev);
-  }, []);
-
-  const stop = useCallback(() => {
+  const stop = useCallback(async () => {
     setIsCountdownActive(false);
     setIsPaused(false);
-  }, []);
+    
+    const nextTime = new Date(Date.now() + countdown * 1000);
+    await upsertTimer(nextTime, false, false);
+  }, [countdown, upsertTimer]);
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     setIsCountdownActive(true);
     setIsPaused(false);
-  }, []);
+    
+    // Generate new countdown when starting
+    const newCountdown = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
+    const nextTime = new Date(Date.now() + newCountdown * 1000);
+    await upsertTimer(nextTime, true, false);
+    setCountdown(newCountdown);
+  }, [minSeconds, maxSeconds, upsertTimer]);
 
   return {
     countdown,
