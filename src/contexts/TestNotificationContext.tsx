@@ -18,8 +18,8 @@ interface TestNotificationContextType {
 const TestNotificationContext = createContext<TestNotificationContextType | undefined>(undefined);
 
 export const TestNotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const timer1 = useTestNotificationCountdown(30, 35); // 30-35 seconds
-  const timer2 = useTestNotificationCountdown(40, 45); // 40-45 seconds
+  const timer1 = useTestNotificationCountdown(3600, 5400); // 60-90 minutes
+  const timer2 = useTestNotificationCountdown(18000, 21600); // 300-360 minutes
   
   return (
     <TestNotificationContext.Provider value={{ timer1, timer2 }}>
