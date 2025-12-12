@@ -310,6 +310,53 @@ export type Database = {
         }
         Relationships: []
       }
+      test_notification_timers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_paused: boolean
+          max_seconds: number
+          min_seconds: number
+          next_notification_at: string
+          timer_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_paused?: boolean
+          max_seconds?: number
+          min_seconds?: number
+          next_notification_at: string
+          timer_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_paused?: boolean
+          max_seconds?: number
+          min_seconds?: number
+          next_notification_at?: string
+          timer_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_notification_timers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
