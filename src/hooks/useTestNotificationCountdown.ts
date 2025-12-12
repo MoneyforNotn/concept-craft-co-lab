@@ -11,8 +11,7 @@ interface TimerData {
   max_seconds: number;
 }
 
-export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: number) => {
-  const timerKey = `timer_${minSeconds}_${maxSeconds}`;
+export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: number, timerKey: string) => {
   const [countdown, setCountdown] = useState<number>(0);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -67,6 +66,8 @@ export const useTestNotificationCountdown = (minSeconds: number, maxSeconds: num
           .from('test_notification_timers')
           .update({
             next_notification_at: nextNotificationAt.toISOString(),
+            min_seconds: minSeconds,
+            max_seconds: maxSeconds,
             is_active: isActive,
             is_paused: isPausedState,
           })
