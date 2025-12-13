@@ -300,15 +300,15 @@ export default function Settings() {
                   <>
                     <div className="border-t pt-6">
                       <div className="flex items-center gap-2 mb-3">
-                        <HelpTooltip content="Auto-timers that send test notifications to your device at random intervals." />
-                        <Label className="font-medium">Test Push Notification</Label>
+                        <HelpTooltip content="Routine notifications that remind you of your daily intention at regular intervals throughout the day." />
+                        <Label className="font-medium">Add Routine Notifications</Label>
                       </div>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                           <div>
-                            <p className="text-sm font-medium">Auto-Timer 1 (5-20s)</p>
+                            <p className="text-sm font-medium">Every ≈2 hours</p>
                             <p className="text-xs text-muted-foreground">
-                              Next in: {timer1.countdown}s
+                              Next in: {Math.floor(timer1.countdown / 60)}m {timer1.countdown % 60}s
                             </p>
                           </div>
                           <Button
@@ -322,7 +322,7 @@ export default function Settings() {
 
                         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                           <div>
-                            <p className="text-sm font-medium">Auto-Timer 2 (60-120m)</p>
+                            <p className="text-sm font-medium">Every ≈6 hours</p>
                             <p className="text-xs text-muted-foreground">
                               Next in: {Math.floor(timer2.countdown / 60)}m {timer2.countdown % 60}s
                             </p>
