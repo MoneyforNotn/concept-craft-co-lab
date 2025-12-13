@@ -281,11 +281,11 @@ export default function Settings() {
             {/* Combined Settings Card */}
             <Card>
               <CardContent className="py-6 space-y-6">
-                {/* Automated Notifications */}
+                {/* Mindful Presence Notifications */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <HelpTooltip content="Receive automated notifications at scheduled times throughout the day to remind you of your daily intention and emotion." />
-                    <Label htmlFor="notifications-toggle" className="font-medium">Automated Notifications</Label>
+                    <HelpTooltip content="Receive notifications throughout the day to remind you of your daily intention and emotion." />
+                    <Label htmlFor="notifications-toggle" className="font-medium">Mindful Presence Notifications</Label>
                   </div>
                   <Switch
                     id="notifications-toggle"
@@ -295,46 +295,29 @@ export default function Settings() {
                   />
                 </div>
 
-                {/* Test Push Notification Timers */}
+                {/* Routine Notification Timers */}
                 {isInitialized && playerId && (
                   <>
-                    <div className="border-t pt-6">
-                      <div className="flex items-center gap-2 mb-3">
+                    <div className="border-t pt-6 space-y-4">
+                      <div className="flex items-center gap-2">
                         <HelpTooltip content="Routine notifications that remind you of your daily intention at regular intervals throughout the day." />
                         <Label className="font-medium">Add Routine Notifications</Label>
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div>
-                            <p className="text-sm font-medium">Every ≈2 hours</p>
-                            <p className="text-xs text-muted-foreground">
-                              Next in: {Math.floor(timer1.countdown / 60)}m {timer1.countdown % 60}s
-                            </p>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={timer1.togglePause}
-                          >
-                            {timer1.isPaused ? "Resume" : "Pause"}
-                          </Button>
-                        </div>
-
-                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div>
-                            <p className="text-sm font-medium">Every ≈6 hours</p>
-                            <p className="text-xs text-muted-foreground">
-                              Next in: {Math.floor(timer2.countdown / 60)}m {timer2.countdown % 60}s
-                            </p>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={timer2.togglePause}
-                          >
-                            {timer2.isPaused ? "Resume" : "Pause"}
-                          </Button>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="timer-2h">Every ≈2 hours</Label>
+                        <Switch
+                          id="timer-2h"
+                          checked={!timer1.isPaused}
+                          onCheckedChange={timer1.togglePause}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="timer-6h">Every ≈6 hours</Label>
+                        <Switch
+                          id="timer-6h"
+                          checked={!timer2.isPaused}
+                          onCheckedChange={timer2.togglePause}
+                        />
                       </div>
                     </div>
                   </>
