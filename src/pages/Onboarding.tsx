@@ -211,9 +211,9 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4 relative">
       <button
-        onClick={() => navigate("/personal-mission")}
-        className="absolute top-4 left-4 p-2 rounded-full hover:bg-muted transition-colors"
-        aria-label="Back to Personal Mission"
+        onClick={() => navigate("/")}
+        className="absolute top-16 left-4 p-2 rounded-full hover:bg-muted transition-colors"
+        aria-label="Back to Dashboard"
       >
         <ArrowLeft className="h-6 w-6 text-foreground" />
       </button>
