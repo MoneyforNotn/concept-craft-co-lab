@@ -170,7 +170,12 @@ export default function Dashboard() {
       setHideStreakProgress(profileData?.hide_streak_progress ?? false);
       setHideHeatmap(profileData?.hide_heatmap ?? false);
 
-      if (profileData && !profileData.onboarding_completed) {
+      // Only force onboarding if the user doesn't have a personal mission yet
+      if (
+        profileData &&
+        !profileData.onboarding_completed &&
+        !(profileData.personal_mission && profileData.personal_mission.trim().length > 0)
+      ) {
         navigate("/onboarding");
         return;
       }
