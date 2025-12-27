@@ -82,31 +82,8 @@ export default function PersonalMission() {
     }
   };
 
-  const handleRetakeOnboarding = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ onboarding_completed: false })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Onboarding reset",
-        description: "Taking you back to the onboarding process.",
-      });
-
-      navigate("/onboarding");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error resetting onboarding",
-        description: error.message,
-      });
-    }
+  const handleRetakeOnboarding = () => {
+    navigate("/onboarding");
   };
 
   if (loading) {
