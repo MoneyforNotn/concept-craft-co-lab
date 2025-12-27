@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { z } from "zod";
 
 const responseSchema = z.object({
@@ -209,7 +209,14 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4 relative">
+      <button
+        onClick={() => navigate("/personal-mission")}
+        className="absolute top-4 left-4 p-2 rounded-full hover:bg-muted transition-colors"
+        aria-label="Back to Personal Mission"
+      >
+        <ArrowLeft className="h-6 w-6 text-foreground" />
+      </button>
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex justify-between items-center mb-2">
