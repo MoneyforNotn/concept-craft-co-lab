@@ -237,7 +237,7 @@ export default function Achievements() {
   const getTierInfo = (days: number) => {
     if (days === 365) {
       return {
-        tier: 'Platinum',
+        tier: 'Transcendent',
         icon: Crown,
         color: 'from-purple-600 via-purple-500 to-pink-500',
         badgeColor: 'bg-gradient-to-r from-purple-600 to-pink-500 text-white',
@@ -247,7 +247,7 @@ export default function Achievements() {
       };
     } else if (days === 160) {
       return {
-        tier: 'Diamond',
+        tier: 'Enlightened',
         icon: Gem,
         color: 'from-cyan-400 via-blue-500 to-indigo-600',
         badgeColor: 'bg-gradient-to-r from-cyan-400 to-indigo-600 text-white',
@@ -257,7 +257,7 @@ export default function Achievements() {
       };
     } else if (days === 80) {
       return {
-        tier: 'Gold',
+        tier: 'Devoted',
         icon: Award,
         color: 'from-yellow-400 via-yellow-500 to-amber-600',
         badgeColor: 'bg-gradient-to-r from-yellow-400 to-amber-600 text-white',
@@ -267,7 +267,7 @@ export default function Achievements() {
       };
     } else if (days === 40) {
       return {
-        tier: 'Silver',
+        tier: 'Committed',
         icon: Medal,
         color: 'from-slate-300 via-slate-400 to-slate-500',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-500 text-white',
@@ -277,7 +277,7 @@ export default function Achievements() {
       };
     } else if (days === 20) {
       return {
-        tier: 'Bronze',
+        tier: 'Steady',
         icon: Trophy,
         color: 'from-orange-500 via-amber-600 to-orange-700',
         badgeColor: 'bg-gradient-to-r from-orange-500 to-orange-700 text-white',
