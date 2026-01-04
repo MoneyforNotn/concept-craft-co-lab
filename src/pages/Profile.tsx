@@ -143,6 +143,13 @@ export default function Profile() {
       await supabase.from('test_notification_timers').delete().eq('user_id', userId);
       await supabase.from('profiles').delete().eq('id', userId);
 
+      // Call edge function to delete user from auth.users
+      const { error: deleteAuthError } = await supabase.functions.invoke('delete-user');
+      
+      if (deleteAuthError) {
+        throw new Error(deleteAuthError.message);
+      }
+
       // Sign out and redirect
       await supabase.auth.signOut();
       
