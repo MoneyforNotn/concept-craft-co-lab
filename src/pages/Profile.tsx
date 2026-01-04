@@ -150,14 +150,16 @@ export default function Profile() {
         throw new Error(deleteAuthError.message);
       }
 
-      // Sign out and redirect
+      // Sign out first
       await supabase.auth.signOut();
       
       toast({
         title: "Account deleted",
         description: "Your account and all data have been permanently deleted.",
       });
-      navigate("/auth");
+      
+      // Force navigation and reload to clear any cached state
+      window.location.href = "/auth";
     } catch (error: any) {
       toast({
         variant: "destructive",
