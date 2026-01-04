@@ -5,7 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Session } from "@supabase/supabase-js";
-import { ArrowLeft, LogOut, Mail, Calendar, Trophy, Lock, Award, Medal, Crown, Zap, Target, Gem } from "lucide-react";
+import { ArrowLeft, LogOut, Mail, Calendar, Trophy, Lock, Award, Medal, Crown, Zap, Target, Gem, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -101,6 +112,49 @@ export default function Profile() {
       toast({
         variant: "destructive",
         title: "Error signing out",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const userId = user?.id;
+      if (!userId) return;
+
+      // First get the user's alignment IDs
+      const { data: alignments } = await supabase
+        .from('daily_alignments')
+        .select('id')
+        .eq('user_id', userId);
+
+      const alignmentIds = alignments?.map(a => a.id) || [];
+
+      // Delete user data from all tables (order matters for foreign keys)
+      if (alignmentIds.length > 0) {
+        await supabase.from('alignment_reflections').delete().in('alignment_id', alignmentIds);
+        await supabase.from('alignment_images').delete().in('alignment_id', alignmentIds);
+      }
+      await supabase.from('milestone_achievements').delete().eq('user_id', userId);
+      await supabase.from('daily_alignments').delete().eq('user_id', userId);
+      await supabase.from('notification_settings').delete().eq('user_id', userId);
+      await supabase.from('notification_logs').delete().eq('user_id', userId);
+      await supabase.from('onboarding_responses').delete().eq('user_id', userId);
+      await supabase.from('test_notification_timers').delete().eq('user_id', userId);
+      await supabase.from('profiles').delete().eq('id', userId);
+
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Account deleted",
+        description: "Your account and all data have been permanently deleted.",
+      });
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting account",
         description: error.message,
       });
     }
@@ -335,7 +389,7 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="pt-4 space-y-2">
+            <div className="pt-4 space-y-3">
               <Button
                 variant="outline"
                 className="w-full"
@@ -344,6 +398,36 @@ export default function Profile() {
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your account
+                      and remove all your data including alignments, achievements, and settings.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete Account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>
