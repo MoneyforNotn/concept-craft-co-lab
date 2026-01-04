@@ -150,16 +150,20 @@ export default function Profile() {
         throw new Error(deleteAuthError.message);
       }
 
-      // Sign out first
+      // Sign out and go back to auth (SPA navigation works reliably on mobile)
       await supabase.auth.signOut();
-      
+
+      // Clear local state immediately to avoid blank screens
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+
       toast({
         title: "Account deleted",
         description: "Your account and all data have been permanently deleted.",
       });
-      
-      // Force navigation and reload to clear any cached state
-      window.location.href = "/auth";
+
+      navigate("/auth", { replace: true });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -257,7 +261,21 @@ export default function Profile() {
   };
 
   if (!user || !profile) {
-    return null;
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-6">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Loading</CardTitle>
+            <CardDescription>Preparing your profile…</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-full w-1/2 bg-primary/60 animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    );
   }
 
   return (
