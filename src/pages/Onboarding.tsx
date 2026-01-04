@@ -36,6 +36,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -128,7 +129,7 @@ export default function Onboarding() {
         title: "Welcome!",
         description: "Your personal mission has been saved.",
       });
-      navigate("/");
+      setShowWelcome(true);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -139,6 +140,32 @@ export default function Onboarding() {
       setLoading(false);
     }
   };
+
+  if (showWelcome) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-2xl">
+          <CardContent className="flex flex-col items-center justify-center p-8 space-y-6 text-center">
+            <Sparkles className="h-12 w-12 text-primary" />
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold">Welcome to Mindful Presence</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                Mindful Presence is designed to help you cultivate a deeper connection with yourself through daily alignment practices. By setting clear intentions and acknowledging your emotions, you develop greater self-awareness and presence in your daily life.
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate("/")} 
+              className="mt-4 gap-2"
+              size="lg"
+            >
+              <Sparkles className="h-4 w-4" />
+              Begin Your Practice
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (generating) {
     return (
