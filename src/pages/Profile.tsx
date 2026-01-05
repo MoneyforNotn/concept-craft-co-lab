@@ -262,18 +262,8 @@ export default function Profile() {
 
   if (!user || !profile) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/20 p-6">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Loading</CardTitle>
-            <CardDescription>Preparing your profile…</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-              <div className="h-full w-1/2 bg-primary/60 animate-pulse" />
-            </div>
-          </CardContent>
-        </Card>
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </main>
     );
   }
