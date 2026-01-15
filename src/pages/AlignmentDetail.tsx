@@ -296,7 +296,7 @@ export default function AlignmentDetail() {
       toast({
         title: "Alignment deleted",
       });
-      navigate("/history");
+      navigate("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -324,7 +324,7 @@ export default function AlignmentDetail() {
         <div className="flex justify-between items-center mb-6 pt-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/history")}
+            onClick={() => navigate("/")}
             className={`fixed top-10 left-4 z-50 transition-all duration-300 ${
               showBackButton ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0 pointer-events-none'
             }`}
