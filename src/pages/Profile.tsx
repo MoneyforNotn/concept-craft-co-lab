@@ -195,49 +195,49 @@ export default function Profile() {
       return {
         tier: 'Platinum',
         icon: Crown,
-        color: 'from-purple-600 via-purple-500 to-pink-500',
+        color: 'from-purple-500 to-pink-500',
         badgeColor: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
       };
     } else if (days === 160) {
       return {
         tier: 'Diamond',
         icon: Award,
-        color: 'from-cyan-400 via-blue-500 to-indigo-600',
+        color: 'from-cyan-400 to-blue-500',
         badgeColor: 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white',
       };
     } else if (days === 80) {
       return {
         tier: 'Ruby',
         icon: Award,
-        color: 'from-yellow-400 via-yellow-500 to-amber-600',
-        badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
+        color: 'from-red-500 to-pink-600',
+        badgeColor: 'bg-gradient-to-r from-red-500 to-pink-600 text-white',
       };
     } else if (days === 40) {
       return {
         tier: 'Emerald',
         icon: Medal,
-        color: 'from-slate-300 via-slate-400 to-slate-500',
-        badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
+        color: 'from-emerald-500 to-green-500',
+        badgeColor: 'bg-gradient-to-r from-emerald-500 to-green-500 text-white',
       };
     } else if (days === 20) {
       return {
         tier: 'Gold',
         icon: Trophy,
-        color: 'from-orange-500 via-amber-600 to-orange-700',
+        color: 'from-yellow-500 to-amber-500',
         badgeColor: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white',
       };
     } else if (days === 10) {
       return {
         tier: 'Silver',
         icon: Medal,
-        color: 'from-green-400 via-emerald-500 to-teal-600',
+        color: 'from-slate-300 to-slate-100',
         badgeColor: 'bg-gradient-to-r from-slate-300 to-slate-100 text-gray-800',
       };
     } else {
       return {
         tier: 'Bronze',
         icon: Trophy,
-        color: 'from-blue-400 via-blue-500 to-blue-600',
+        color: 'from-amber-700 to-amber-600',
         badgeColor: 'bg-gradient-to-r from-amber-700 to-amber-600 text-white',
       };
     }
