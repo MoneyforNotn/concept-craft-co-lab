@@ -21,6 +21,7 @@ import SelectMilestoneAlignment from "./pages/SelectMilestoneAlignment";
 import LearnMore from "./pages/LearnMore";
 import GenerateIntentions from "./pages/GenerateIntentions";
 import PersonalMission from "./pages/PersonalMission";
+import IncompleteChecklist from "./pages/IncompleteChecklist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/learn-more" element={<LearnMore />} />
             <Route path="/generate-intentions" element={<GenerateIntentions />} />
             <Route path="/personal-mission" element={<PersonalMission />} />
+            <Route path="/incomplete-checklist" element={<IncompleteChecklist />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

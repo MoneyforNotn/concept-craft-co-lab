@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,12 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { User as UserType, Session } from "@supabase/supabase-js";
-import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen, ChevronDown, CheckSquare } from "lucide-react";
+import { Sparkles, Book, Settings, Plus, User as UserIcon, Bell, BellOff, Trophy, Award, Medal, Crown, Sparkles as SparklesIcon, BookOpen, ChevronDown, CheckSquare, ListTodo } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useDespiaPush } from "@/hooks/useDespiaPush";
 import { getCurrentDate } from "@/lib/timezoneUtils";
+import { format } from "date-fns";
 import ReflectionForm from "@/components/ReflectionForm";
 import StarRating from "@/components/StarRating";
 import {
@@ -62,6 +63,7 @@ export default function Dashboard() {
   const [openReflections, setOpenReflections] = useState<Record<string, boolean>>({});
   const [openAboutNotifications, setOpenAboutNotifications] = useState(false);
   const [allAlignments, setAllAlignments] = useState<Array<{ date: string; hasReflection: boolean }>>([]);
+  const [incompleteAlignments, setIncompleteAlignments] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { getAllPendingNotifications } = useNotifications();
@@ -239,6 +241,22 @@ export default function Dashboard() {
           hasReflection: a.alignment_reflections && a.alignment_reflections.length > 0
         })));
       }
+
+      // Load past incomplete checklist items (exclude today)
+      const { data: pastAlignments } = await supabase
+        .from('daily_alignments')
+        .select('*')
+        .eq('user_id', userId)
+        .neq('date', today)
+        .not('checklist_items', 'is', null)
+        .order('date', { ascending: false })
+        .limit(20);
+
+      const incomplete = (pastAlignments || []).filter((a: any) => {
+        const items = a.checklist_items as any[];
+        return items && items.length > 0 && items.some((i: any) => !i.checked);
+      });
+      setIncompleteAlignments(incomplete);
 
     } catch (error: any) {
       console.error('Error loading user data:', error);
@@ -594,6 +612,63 @@ export default function Dashboard() {
         )}
 
         {!hideHeatmap && <AlignmentHeatmap alignments={allAlignments} timezone={profile?.timezone} />}
+
+        {/* Incomplete Checklist Items Panel */}
+        {incompleteAlignments.length > 0 && (
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+          >
+            <CardHeader className="pb-3" onClick={() => navigate("/incomplete-checklist")}>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <ListTodo className="h-4 w-4" />
+                Incomplete Tasks
+                <Badge variant="secondary" className="ml-auto">
+                  {incompleteAlignments.reduce((sum, a) => sum + (a.checklist_items as any[]).filter((i: any) => !i.checked).length, 0)}
+                </Badge>
+              </CardTitle>
+              <CardDescription className="text-xs">Past checklist items not yet completed</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {incompleteAlignments.slice(0, 3).map((alignment: any) => (
+                <div key={alignment.id} className="space-y-1.5">
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(alignment.created_at), 'MMM d')} · {alignment.intention}
+                  </p>
+                  {(alignment.checklist_items as any[])
+                    .map((item: any, index: number) => ({ ...item, originalIndex: index }))
+                    .filter((item: any) => !item.checked)
+                    .slice(0, 3)
+                    .map((item: any) => (
+                      <div key={`${alignment.id}-${item.originalIndex}`} className="flex items-start gap-3 pl-2">
+                        <Checkbox
+                          checked={item.checked}
+                          onCheckedChange={async () => {
+                            const items = [...alignment.checklist_items];
+                            items[item.originalIndex] = { ...items[item.originalIndex], checked: true };
+                            const { error } = await supabase
+                              .from('daily_alignments')
+                              .update({ checklist_items: items as any })
+                              .eq('id', alignment.id);
+                            if (!error && user) loadUserData(user.id);
+                          }}
+                          className="mt-0.5"
+                        />
+                        <span className="text-sm">{item.text}</span>
+                      </div>
+                    ))}
+                </div>
+              ))}
+              {incompleteAlignments.length > 3 && (
+                <p 
+                  className="text-xs text-primary cursor-pointer hover:underline text-center pt-1"
+                  onClick={() => navigate("/incomplete-checklist")}
+                >
+                  View all →
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-3 gap-4 pb-3">
           <Button
