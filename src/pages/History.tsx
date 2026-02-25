@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bookmark, Calendar, Filter, Loader2 } from "lucide-react";
+import { ArrowLeft, Bookmark, Calendar, Filter, Loader2, SlidersHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import StarRating from "@/components/StarRating";
 import { User, Session } from "@supabase/supabase-js";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function History() {
   const [user, setUser] = useState<User | null>(null);
@@ -19,6 +21,8 @@ export default function History() {
   const [reflections, setReflections] = useState<Record<string, any[]>>({});
   const [showBackButton, setShowBackButton] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [filterYear, setFilterYear] = useState<string>("all");
+  const [filterMonth, setFilterMonth] = useState<string>("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,6 +74,30 @@ export default function History() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
+  const availableYears = useMemo(() => {
+    const years = new Set(alignments.map(a => new Date(a.created_at).getFullYear().toString()));
+    return Array.from(years).sort((a, b) => b.localeCompare(a));
+  }, [alignments]);
+
+  const monthOptions = [
+    { value: "0", label: "January" }, { value: "1", label: "February" },
+    { value: "2", label: "March" }, { value: "3", label: "April" },
+    { value: "4", label: "May" }, { value: "5", label: "June" },
+    { value: "6", label: "July" }, { value: "7", label: "August" },
+    { value: "8", label: "September" }, { value: "9", label: "October" },
+    { value: "10", label: "November" }, { value: "11", label: "December" },
+  ];
+
+  const filteredAlignments = useMemo(() => {
+    return alignments.filter(a => {
+      const date = new Date(a.created_at);
+      if (filterYear !== "all" && date.getFullYear().toString() !== filterYear) return false;
+      if (filterMonth !== "all" && date.getMonth().toString() !== filterMonth) return false;
+      return true;
+    });
+  }, [alignments, filterYear, filterMonth]);
+
+  const isFilterActive = filterYear !== "all" || filterMonth !== "all";
 
   if (authLoading) {
     return (
@@ -142,6 +170,7 @@ export default function History() {
     return sum / alignmentReflections.length;
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/15 via-blue-500/10 via-70% to-secondary/20 p-4">
       <div className="container max-w-4xl mx-auto py-8">
@@ -157,14 +186,60 @@ export default function History() {
             Back
           </Button>
           
-          <Button
-            variant={showBookmarkedOnly ? "default" : "outline"}
-            onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
-            className="gap-2"
-          >
-            <Bookmark className={showBookmarkedOnly ? "fill-current" : ""} />
-            {showBookmarkedOnly ? "Show All" : "Bookmarked Only"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showBookmarkedOnly ? "default" : "outline"}
+              onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
+              className="gap-2"
+            >
+              <Bookmark className={showBookmarkedOnly ? "fill-current" : ""} />
+              {showBookmarkedOnly ? "Show All" : "Bookmarked Only"}
+            </Button>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant={isFilterActive ? "default" : "outline"} size="icon" className="relative">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {isFilterActive && (
+                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 space-y-4" align="end">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Year</label>
+                  <Select value={filterYear} onValueChange={(v) => { setFilterYear(v); if (v === "all") setFilterMonth("all"); }}>
+                    <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Years</SelectItem>
+                      {availableYears.map(y => (
+                        <SelectItem key={y} value={y}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {filterYear !== "all" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Month</label>
+                    <Select value={filterMonth} onValueChange={setFilterMonth}>
+                      <SelectTrigger><SelectValue placeholder="All Months" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Months</SelectItem>
+                        {monthOptions.map(m => (
+                          <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {isFilterActive && (
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => { setFilterYear("all"); setFilterMonth("all"); }}>
+                    Clear Filters
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <Card className="mb-6">
@@ -176,7 +251,7 @@ export default function History() {
                   {showBookmarkedOnly ? "Your bookmarked alignments" : "Reflect on your past alignments"}
                 </CardDescription>
               </div>
-              {showBookmarkedOnly && (
+              {(showBookmarkedOnly || isFilterActive) && (
                 <Badge variant="secondary" className="gap-1">
                   <Filter className="h-3 w-3" />
                   Filtered
@@ -190,7 +265,7 @@ export default function History() {
           <div className="text-center py-12">
             <p className="text-muted-foreground">Loading...</p>
           </div>
-        ) : alignments.length === 0 ? (
+        ) : filteredAlignments.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -206,7 +281,7 @@ export default function History() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {alignments.map((alignment) => (
+            {filteredAlignments.map((alignment) => (
               <Card
                 key={alignment.id}
                 className="cursor-pointer hover:bg-accent/50 transition-colors"
