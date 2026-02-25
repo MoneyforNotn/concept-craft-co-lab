@@ -1,8 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface AlignmentHeatmapProps {
   alignments: { date: string; hasReflection: boolean }[];
@@ -10,8 +8,38 @@ interface AlignmentHeatmapProps {
 }
 
 export default function AlignmentHeatmap({ alignments, timezone = 'local' }: AlignmentHeatmapProps) {
-  // pageOffset: 0 = current period, 1 = previous 12 weeks, etc.
   const [pageOffset, setPageOffset] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartX = useRef<number | null>(null);
+  const isDragging = useRef(false);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    dragStartX.current = e.clientX;
+    isDragging.current = false;
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (dragStartX.current !== null && Math.abs(e.clientX - dragStartX.current) > 10) {
+      isDragging.current = true;
+    }
+  }, []);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (dragStartX.current === null) return;
+    const diff = e.clientX - dragStartX.current;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        // Swiped right → go back in time
+        setPageOffset(prev => prev + 1);
+      } else {
+        // Swiped left → go forward in time
+        setPageOffset(prev => Math.max(0, prev - 1));
+      }
+    }
+    dragStartX.current = null;
+    isDragging.current = false;
+  }, []);
 
   const formatDateInTimezone = (date: Date): string => {
     if (timezone === 'local') {
@@ -28,7 +56,6 @@ export default function AlignmentHeatmap({ alignments, timezone = 'local' }: Ali
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
-    // Shift the end date back by pageOffset * 84 days (12 weeks)
     const endDate = new Date(today);
     endDate.setDate(endDate.getDate() - pageOffset * 84);
 
@@ -75,19 +102,6 @@ export default function AlignmentHeatmap({ alignments, timezone = 'local' }: Ali
     return grid;
   }, [alignments, timezone, pageOffset]);
 
-  // Check if there are any alignments older than what the current page shows
-  const canGoBack = useMemo(() => {
-    if (alignments.length === 0) return false;
-    const today = new Date();
-    const oldestVisibleDate = new Date(today);
-    oldestVisibleDate.setDate(oldestVisibleDate.getDate() - (pageOffset + 1) * 84);
-    const oldestAlignment = alignments.reduce((oldest, a) => {
-      const d = a.date.split('T')[0];
-      return d < oldest ? d : oldest;
-    }, alignments[0].date.split('T')[0]);
-    return oldestAlignment < formatDateInTimezone(oldestVisibleDate) || pageOffset < 10;
-  }, [alignments, pageOffset, timezone]);
-
   const getIntensityClass = (hasAlignment: boolean, hasReflection: boolean) => {
     if (hasReflection) {
       return "bg-primary hover:bg-primary/90";
@@ -103,32 +117,19 @@ export default function AlignmentHeatmap({ alignments, timezone = 'local' }: Ali
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Activity Calendar</CardTitle>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setPageOffset(prev => prev + 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              disabled={pageOffset === 0}
-              onClick={() => setPageOffset(prev => Math.max(0, prev - 1))}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <CardTitle className="text-lg">Activity Calendar</CardTitle>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
-          <div className="space-y-2">
+          <div
+            ref={containerRef}
+            className="space-y-2 select-none touch-pan-y"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={() => { dragStartX.current = null; isDragging.current = false; }}
+            style={{ cursor: 'grab' }}
+          >
             {/* Month labels */}
             <div className="flex gap-1">
               <div className="w-8" />
@@ -204,6 +205,20 @@ export default function AlignmentHeatmap({ alignments, timezone = 'local' }: Ali
                 ))}
               </div>
             </div>
+
+            {/* Swipe indicator dots */}
+            {pageOffset > 0 && (
+              <div className="flex justify-center gap-1 pt-1">
+                {Array.from({ length: Math.min(pageOffset + 1, 5) }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === 0 ? 'w-3 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </TooltipProvider>
       </CardContent>
