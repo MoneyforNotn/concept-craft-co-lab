@@ -249,13 +249,13 @@ export default function CreateAlignment() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="checklist" className="text-base font-semibold italic">Daily Checklist (optional)</Label>
+                <Label htmlFor="checklist" className="text-base font-semibold italic">Daily Checklist</Label>
                 <Textarea
                   id="checklist"
                   value={checklist}
                   onChange={handleChecklistChange}
                   onKeyDown={handleChecklistKeyDown}
-                  placeholder="- Add items you want to accomplish today"
+                  placeholder="- Add items you want to accomplish today (optional)"
                   disabled={loading}
                   className="min-h-[100px] resize-none"
                 />
