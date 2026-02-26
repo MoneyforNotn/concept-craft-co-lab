@@ -29,23 +29,38 @@ WHAT MAKES A GREAT INTENTION:
 - It's a behavioral pattern or mindset, NOT a one-time task
 - It's specific enough to be actionable but universal enough to apply in many moments
 - It transforms ordinary interactions and tasks into meaningful practices
+- It uses SIMPLE, RELATABLE language — avoid grandiose or academic words like "transformative", "ignite", "paradigm", "cultivate"
+- It describes something a person can DO or NOTICE in everyday moments, not a lofty abstract goal
+- It stands alone as a SINGLE DAY's focus — never say "each day", "every day", or "daily" because the intention IS the day's focus already
 
-EXCELLENT EXAMPLES (study these patterns):
-- "Make sure everyone you talk to feels valued and respected" (purpose: honor others, action: in every conversation)
-- "Live the day without fear of negative judgement" (purpose: freedom, action: release worry in each moment)
-- "Keep a straight and confident posture" (purpose: confidence, action: physical awareness)
-- "Notice what makes you smile" (purpose: gratitude, action: active observation)
-- "Create a plan for the day and stick to it" (purpose: discipline, action: commitment to structure)
-- "Notice others' emotions and respond to them" (purpose: empathy, action: attentive presence)
-- "Treat every task with maximum focus" (purpose: excellence, action: deliberate attention)
-- "Radiate positivity and joy in every interaction" (purpose: uplift others, action: conscious energy)
-- "Empower others by showing you have faith and confidence in them" (purpose: inspire growth, action: express belief)
+EXCELLENT EXAMPLES (study these patterns closely):
+- "Make sure everyone you talk to feels valued and respected" — simple, clear, repeatable in every conversation
+- "Live the day without fear of negative judgement" — a mindset you carry, easy to remember
+- "Keep a straight and confident posture" — physical, concrete, noticeable
+- "Notice what makes you smile" — gentle observation, anyone can do it
+- "Create a plan for the day and stick to it" — actionable and structured
+- "Notice others' emotions and respond to them" — specific behavior, easy to practice
+- "Treat every task with maximum focus" — clear standard to hold yourself to
+- "Radiate positivity and joy in every interaction" — warm, approachable energy
+- "Empower others by showing you have faith and confidence in them" — specific way to interact
+- "Ask one genuine question in every conversation" — concrete, repeatable, simple
+- "Pause before reacting and choose your response" — practical mindfulness
+- "Give people your full attention when they speak" — specific and easy to track
 
 AVOID THESE WEAK PATTERNS:
-- Vague statements like "Be more mindful" or "Stay positive" (no clear action)
-- One-time tasks like "Try something new" or "Learn a skill" (not repeatable)
-- Situation-specific like "Handle stress better at work" (too narrow)
-- Generic advice like "Take care of yourself" (not actionable)
+- Overly complex or demanding: "Engage in meaningful conversations that challenge perspectives and ignite curiosity" — too many abstract goals stacked together
+- Using "each day" or "every day": "Share one new insight with someone each day" — the intention already IS for today, don't reference daily repetition
+- Grandiose vocabulary: words like "transformative", "ignite", "paradigm shift", "catalyze" feel distant and hard to act on
+- Vague statements: "Be more mindful" or "Stay positive" (no clear action)
+- One-time tasks: "Try something new" or "Learn a skill" (not repeatable throughout the day)
+- Situation-specific: "Handle stress better at work" (too narrow)
+- Generic advice: "Take care of yourself" (not actionable)
+
+TONE GUIDELINES:
+- Write like a wise friend giving advice, not a motivational poster
+- Keep it under 12 words when possible
+- Use verbs that describe observable behavior: notice, ask, listen, give, pause, speak, show, choose
+- The reader should instantly understand what to DO differently today
 
 Each intention should feel like a personal challenge that transforms how the user moves through their entire day.
 
